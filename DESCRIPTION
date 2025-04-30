@@ -1,16 +1,22 @@
 Package: drawsneeded
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Estimates the number of samples at least needed to ascertain a minimum error
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Crist-Jan", "Doedens",
+      email = "cjd@chance-matters.nl",
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+Description: In an audit of monetary expenses we might use sampling to establish
+   an estimate of the error rate in a mass of monetary transactions.
+   For planning the number of necessary samples we can use the function exported by
+   this tiny package.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.3.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
