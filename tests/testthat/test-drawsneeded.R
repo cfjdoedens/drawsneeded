@@ -26,3 +26,4 @@ test_that("0 < max_n", {
   expect_error(drawsneeded(0.02, 0.95, 0.02, max_n = 0))
 })
 
+
