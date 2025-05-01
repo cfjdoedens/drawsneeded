@@ -12,7 +12,7 @@ drawsneeded(expected_error_rate, certainty, allowed_error_rate, max_n = 1000)
 \item{certainty}{The certainty level you want, e.g. \code{0.95}.}
 
 \item{allowed_error_rate}{The highest error rate that is still acceptable.
-Should be lower than expected_error_rate.}
+Should be higher than expected_error_rate.}
 
 \item{max_n}{The maximum number of samples you are willing to use.}
 }
@@ -21,7 +21,13 @@ An estimate of the needed number of samples. Or \code{-1} if the maximum number
     of samples needed is higher than max_n.
 }
 \description{
-compute number of samples needed to establish minimal error level with enough certainty
+In monetary unit sampling we have a file of monetary statements.
+In general this concerns money that has been spent.
+We want to estimate the percentage of money from the file that was wrongfully spent,
+the error rate.
+The function guesses the number of monetary unit
+draws needed
+to establish with some certainty that the error rate is below a certain threshold.
 }
 \examples{
   x <- drawsneeded(0.001, 0.95, 0.02, max_n = 500)

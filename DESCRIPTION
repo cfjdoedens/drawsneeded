@@ -15,10 +15,11 @@ Description: In an audit of monetary expenses we might use sampling to establish
    this tiny package.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 URL: https://github.com/cfjdoedens/drawsneeded
 BugReports: https://github.com/cfjdoedens/drawsneeded/issues
+Imports: 
+    dplyr

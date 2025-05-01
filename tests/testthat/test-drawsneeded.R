@@ -1,6 +1,9 @@
 test_that("function has normal return value as expected", {
   expect_equal(drawsneeded(0.001, 0.95, 0.02, max_n = 1000), 163)
 })
+test_that("standard example with no errors expected, 0.95 certainty and 1% errors allowed", {
+  expect_equal(drawsneeded(0.0, 0.95, 0.01, max_n = 1000), 298)
+})
 test_that("0 <= expected_error_rate", {
   expect_error(drawsneeded(-0.001, 0.95, 0.02, max_n = 1000))
 })
