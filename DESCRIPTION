@@ -22,4 +22,10 @@ Config/testthat/edition: 3
 URL: https://github.com/cfjdoedens/drawsneeded
 BugReports: https://github.com/cfjdoedens/drawsneeded/issues
 Imports: 
-    dplyr
+    binompoiscont,
+    dplyr,
+    ewgraph,
+    ggplot2,
+    tibble, 
+    tidyr
+    

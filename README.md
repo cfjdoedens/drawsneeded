@@ -12,7 +12,7 @@ unit sampling we have a file of monetary statements. In general this
 concerns money that has been spent. We want to estimate the percentage
 of money from the file that was wrongfully spent, the error rate.
 
-This very tiny package has one function, drawsneeded(). The function
+This very tiny package has the function, drawsneeded(). The function
 gives an estimate of the number of monetary unit draws needed to
 establish with some certainty that the error rate is below a certain
 threshold.
@@ -20,14 +20,19 @@ threshold.
 This is only a good estimation. Due to randomness, the actual number of
 monetary unit draws needed might be either to low or to high.
 
+The package also has the function draws_needed_plot() which calls
+drawsneeded() and shows the result in a plot.
+
 ## Installation
 
 You can install the development version of drawsneeded from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("pak")
-pak::pak("cfjdoedens/drawsneeded")
+if (! require("drawsneeded")) {
+  install.packages("pak")
+  pak::pak("cfjdoedens/drawsneeded")
+}
 ```
 
 ## Example: 0.1 percent error expected
@@ -41,20 +46,29 @@ check is 500. So you set max_n to 500.
 
 ``` r
 library(drawsneeded)
- drawsneeded(expected_error_rate = 0.001, certainty = 0.95, allowed_error_rate = 0.01, max_n = 500)
+drawsneeded(expected_error_rate = 0.001, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
 #> [1] 365
 ```
 
 The conclusion is that you will need at least 365 samples.
 
+In a picture this looks like:
+
+``` r
+library(drawsneeded)
+drawsneeded_plot(expected_error_rate = 0.001, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
+```
+
+<img src="man/figures/README-plot example 0.1 percent errors expected-1.png" width="100%" />
+
 ## Example: no error expected
 
-However, you might expect that to see no error at all. Then you could
+However, you might expect to see no error at all. Then you could
 calculate as follows:
 
 ``` r
 library(drawsneeded)
- drawsneeded(expected_error_rate = 0.0, certainty = 0.95, allowed_error_rate = 0.01, max_n = 500)
+ drawsneeded(expected_error_rate = 0.0, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
 #> [1] 298
 ```
 
@@ -64,10 +78,11 @@ So probably 298 samples is sufficient.
 
 - Make drawsneeded() work nicely with vector parameters that have length
   \> 1.
-- Add graph that shows planned result: cdf with
-  - vertical line for expected_error_rate
-  - vertical line for allowed_error_rate
-  - if possible, depict number of draws needed
-  - if possible, depict situation when too many draws are needed
+- Handle case where only integer values of k are possible. For example
+  when k \> 1-cert, then round k up. Otherwise round k down.
 - Add extra margin, so extra draws, by taking into account the standard
-  deviation.
+  deviation.  
+- drawsneeded_plot(): If possible, depict situation when too many draws
+  are needed.
+- drawsneeded_plot() depict as multiple chance graphs different
+  postulated values for k, in one picture.
