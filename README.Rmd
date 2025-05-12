@@ -1,8 +1,9 @@
 ---
 output: github_document
-title: drawsneeded_readme
 ---
-< !--README.md is generated from README.Rmd. Please edit that file- ->
+
+<!--README.md is generated from README.Rmd. Please edit that file -->
+
 ```{r init, include = FALSE}
 knitr::opts_chunk$set(
 collapse = TRUE,
