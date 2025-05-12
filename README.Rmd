@@ -1,4 +1,8 @@
----output:github_document---< !--README.md is generated from README.Rmd. Please edit that file- ->
+---
+output: github_document
+title: drawsneeded_readme
+---
+< !--README.md is generated from README.Rmd. Please edit that file- ->
 ```{r init, include = FALSE}
 knitr::opts_chunk$set(
 collapse = TRUE,
@@ -10,10 +14,7 @@ out.width = "100%"
 
 # drawsneeded
 
-< !--badges:start- ->
-< !--badges:end- ->
-
-The pacakage drawsneeded supports monetary unit sampling.
+The pacakage supports monetary unit sampling.
 In monetary unit sampling we have a file of monetary statements.
 In general this concerns money that has been spent.
 We want to estimate the percentage of money from the file that was wrongfully spent, the error rate.
@@ -28,7 +29,7 @@ Due to randomness, the actual number of monetary unit draws needed
 might be either to
 low or to high.
 
-The package also has the function draws_needed_plot() which calls drawsneeded()
+The package also has the function drawsneeded_plot() which calls drawsneeded()
 and shows the result in a plot.
 
 ## Installation
@@ -50,21 +51,22 @@ if (file.exists("/home/crist-jan/R/x86_64-pc-linux-gnu-library/4.5/drawsneeded")
 
 Suppose you know from previous experience
 that a small error rate might exist in the mass of monetary statements.
-You estimate the error rate to be no more than 0.1 percent.
+You estimate the error rate to be no more than 0.1 percent of the total
+mass in money.
 So you set expected_error_rate to 0.001.
 You need a result with 95% certainty.
 So you set certainty to 0.95, You decide that the maximum number of samples you are willing to
 draw and check is 500.
 So you set max_n to 500.
 
-```{r example-tiny-percent-errors-expected}
+```{r example.tiny.percent.errors.expected}
 library(drawsneeded)
 drawsneeded(expected_error_rate = 0.001, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
 ```
 The conclusion is that you will need at least 365 samples.
 
 In a picture this looks like:
-```{r plot_example_0.1_percent_error_expected}
+```{r plot.example.tiny.percent.errors.expected}
 library(drawsneeded)
 drawsneeded_plot(expected_error_rate = 0.001, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
 ```
@@ -73,12 +75,18 @@ drawsneeded_plot(expected_error_rate = 0.001, cert = 0.95, allowed_error_rate = 
 
 However, you might expect to see no error at all. Then you could
 calculate as follows:
-```{r example-no-errors-expected}
+```{r example.no.errors.expected}
 library(drawsneeded)
 drawsneeded(expected_error_rate = 0.0, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
 ```
 
 So probably 298 samples is sufficient.
+
+In a picture this looks like:
+```{r plot.example.no.errors.expected}
+library(drawsneeded)
+drawsneeded_plot(expected_error_rate = 0.0, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
+```
 
 ## Still TODO
 
