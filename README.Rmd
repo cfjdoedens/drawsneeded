@@ -8,7 +8,7 @@ output: github_document
   [![R-CMD-check](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml)
   <!-- badges: end -->
 
-```{r init, include = FALSE}
+```{r init, message=TRUE, warning=TRUE, include=FALSE, paged.print=TRUE}
 knitr::opts_chunk$set(
 collapse = TRUE,
 comment = "#>",
@@ -19,12 +19,12 @@ out.width = "100%"
 
 # drawsneeded
 
-The pacakage supports monetary unit sampling.
+Supports monetary unit sampling.
 In monetary unit sampling we have a file of monetary statements.
 In general this concerns money that has been spent.
 We want to estimate the percentage of money from the file that was wrongfully spent, the error rate.
 
-This very tiny package has the function, drawsneeded().
+This very tiny package has the function drawsneeded().
 The function gives an estimate of the number of monetary unit
 draws needed
 to establish with some certainty that the error rate is below a certain threshold.
@@ -42,13 +42,15 @@ You can install the development version of drawsneeded from [GitHub](https://git
 ```{r install, message=TRUE, warning=TRUE, echo=TRUE}
 if (file.exists("/home/crist-jan/R/x86_64-pc-linux-gnu-library/4.5/drawsneeded")) {
   # We are executing on the author machine, use the development version available there.
-  loadNamespace("drawsneeded")
+  library("drawsneeded")
+  print("using files directly from author of package; not from github")
 } else {
   # Use the github version.
   if (!requireNamespace("pak", quietly = TRUE)) {
     install.packages("pak")
   }
   pak::pak("cfjdoedens/drawsneeded")
+  print("using files from github")
 }
 ```
 
@@ -64,34 +66,42 @@ So you set certainty to 0.95, You decide that the maximum number of samples you 
 draw and check is 500.
 So you set max_n to 500.
 
-```{r example.tiny.percent.errors.expected}
-library(drawsneeded)
-drawsneeded(expected_error_rate = 0.001, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
+```{r example-tiny-percent-errors-expected}
+drawsneeded(expected_error_rate = 0.001, allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
 ```
 The conclusion is that you will need at least 365 samples.
 
 In a picture this looks like:
-```{r plot.example.tiny.percent.errors.expected}
-library(drawsneeded)
-drawsneeded_plot(expected_error_rate = 0.001, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
+```{r plot-example-tiny-percent-errors-expected}
+drawsneeded_plot(expected_error_rate = 0.001,  allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
 ```
 
 ## Example: no error expected
 
 However, you might expect to see no error at all. Then you could
 calculate as follows:
-```{r example.no.errors.expected}
-library(drawsneeded)
-drawsneeded(expected_error_rate = 0.0, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
+```{r example-no-errors-expected}
+drawsneeded(expected_error_rate = 0.0, allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
 ```
 
 So probably 298 samples is sufficient.
 
 In a picture this looks like:
-```{r plot.example.no.errors.expected}
-library(drawsneeded)
-drawsneeded_plot(expected_error_rate = 0.0, cert = 0.95, allowed_error_rate = 0.01, max_n = 500)
+```{r plot-example-no-errors-expected}
+drawsneeded_plot(expected_error_rate = 0.0, allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
 ```
+
+## Example: multiple  expected_error_rate s
+
+Suppose we want to try several different expected error rates in one go:
+```{r example-several-different-expected-error-rates}
+drawsneeded(expected_error_rate = seq(from = 0.0, by = 0.001, to = 0.009), allowed_error_rate = 0.01, cert = 0.95, max_n = 10000)
+```
+
+We see that as expected_error_rate goes near to allowed_error_rate, the number
+of draws needed rises more strongly.
+
+For the moment drawsneeded_plot() can not picture this in one plot.
 
 ## Still TODO
 
@@ -105,5 +115,3 @@ cert, then round k up. Otherwise round k down.
 * drawsneeded_plot(): work nicely with parameters of
   drawsneeded() that have length > 1.
 * drawsneeded_plot(): if possible, depict situation when too many draws are needed.
-* drawsneeded_plot(): depict as multiple chance graphs different postulated
-values for k, in one picture.

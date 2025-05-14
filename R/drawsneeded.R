@@ -158,7 +158,11 @@ drawsneeded <- function(expected_error_rate,
         q, shape1 = k + 1, shape2 = n - k + 1
       )))
 
-      if (q < allowed_error_rate) {
+      stopifnot(length(q) == 1)
+      stopifnot(length(allowed_error_rate) == 1)
+
+      qqq <- q
+      if (qqq < allowed_error_rate) {
         return(n)
       }
     }

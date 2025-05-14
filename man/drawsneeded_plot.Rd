@@ -43,6 +43,9 @@ chance density graph for k = n*eer, n = n.
 The vertical lines to denote expected_error_rate and allowed_error_rate are
 also on the graph.
 }
+\details{
+For the moment there is no support for vector args with length > 1.
+}
 \examples{
   drawsneeded_plot(0.001, 0.02, cert = 0.95, max_n = 500)
 }
