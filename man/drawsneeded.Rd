@@ -30,6 +30,10 @@ This function guesses the number of monetary unit
 draws needed
 to establish with some certaintity that the error rate is below a certain threshold.
 }
+\details{
+Each of the four arguments can have length > 1, but only one of these
+four arguments.
+}
 \examples{
   x <- drawsneeded(0.001, 0.02, cert = 0.95, max_n = 500)
 }

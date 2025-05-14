@@ -4,6 +4,10 @@ output: github_document
 
 <!--README.md is generated from README.Rmd. Please edit that file -->
 
+ <!-- badges: start -->
+  [![R-CMD-check](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml)
+  <!-- badges: end -->
+
 ```{r init, include = FALSE}
 knitr::opts_chunk$set(
 collapse = TRUE,
@@ -98,3 +102,7 @@ cert, then round k up. Otherwise round k down.
 * drawsneeded_plot():If possible, depict situation when too many draws are needed.
 * drawsneeded_plot() depict as multiple chance graphs different postulated
 values for k, in one picture.
+* There is something very strange in fact going on: you pretend to know something
+  about the file to be audited, i.e. expected_error_rate > 0 at least some times,
+  but you do not want to use that info in the estimation, or is that
+  correct as this only concerns the planning phase? I get a bit confused.

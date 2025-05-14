@@ -8,6 +8,9 @@
 #' draws needed
 #' to establish with some certaintity that the error rate is below a certain threshold.
 #'
+#' Each of the four arguments can have length > 1, but only one of these
+#' four arguments.
+#'
 #' @param expected_error_rate The estimated error rate from earlier knowledge.
 #' @param allowed_error_rate The highest error rate that is still acceptable.
 #'     So the treshold.
@@ -27,49 +30,147 @@ drawsneeded <- function(expected_error_rate,
                         allowed_error_rate,
                         cert = 0.95,
                         max_n = 1000) {
-  # Check parameters.
-  stopifnot(0 <= expected_error_rate)
-  stopifnot(expected_error_rate < 1)
-  stopifnot(0 < allowed_error_rate)
-  stopifnot(allowed_error_rate < 1)
-  stopifnot(expected_error_rate < allowed_error_rate)
-  stopifnot(0 < cert)
-  stopifnot(cert < 1)
-  stopifnot(0 < max_n)
+  # We first handle recursion :-) .
+  {
+    # Check that all 4 arguments are numeric vectors.
+    stopifnot(is.numeric(expected_error_rate))
+    stopifnot(is.numeric(allowed_error_rate))
+    stopifnot(is.numeric(cert))
+    stopifnot(is.numeric(max_n))
 
-  # We iterate from 1 to max_n to search for the n that will
-  # give a satisfactory level of certainty.
-  # A bit more complex, but more efficient, method would be
-  # to use binary search.
-  # I have not used binary search here to keep the code simple.
-  for (n in 1:max_n) {
-    k <- n * expected_error_rate
+    # If expected_error_rate has length > 1,
+    # map it over drawsneeded().
+    # And return results in 1 vector.
+    if (length(expected_error_rate) > 1) {
+      stopifnot(length(allowed_error_rate) == 1)
+      stopifnot(length(cert) == 1)
+      stopifnot(length(max_n) == 1)
 
-    # Compute maximum error rate, q, given certainty level.
-    # We do this using the beta quantile function.
-    # We can interpret cert here as the surface below the chance
-    # density function left of the vertical line error rate == q.
-    q <- qbeta(cert, shape1 = k + 1, shape2 = n - k + 1)
+      r <- numeric(length(expected_error_rate))
+      for (i in seq_along(r)) {
+        stopifnot(length(expected_error_rate[[i]]) == 1)
+        r[[i]] <- drawsneeded(
+          expected_error_rate = expected_error_rate[[i]],
+          allowed_error_rate = allowed_error_rate,
+          cert = cert,
+          max_n = max_n
+        )
+      }
+      return(r)
+    }
 
-    # pbeta() is the inverse function:
-    # The beta cumulative density function pbeta(), with parameter
-    # q, and the same shape parameters, returns the cert.
-    stopifnot(near(cert, pbeta(
-      q, shape1 = k + 1, shape2 = n - k + 1
-    )))
+    # If allowed_error_rate has length > 1,
+    # map it over drawsneeded().
+    # And return results in 1 vector.
+    if (length(allowed_error_rate) > 1) {
+      stopifnot(length(expected_error_rate) == 1)
+      stopifnot(length(cert) == 1)
+      stopifnot(length(max_n) == 1)
 
-    if (q < allowed_error_rate) {
-      return(n)
+      r <- numeric(length(allowed_error_rate))
+      for (i in seq_along(r)) {
+        r[[i]] <- drawsneeded(
+          expected_error_rate = expected_error_rate,
+          allowed_error_rate = allowed_error_rate[[i]],
+          cert = cert,
+          max_n = max_n
+        )
+      }
+      return(r)
+    }
+
+    # If cert has length > 1,
+    # map it over drawsneeded().
+    # And return results in 1 vector.
+    if (length(cert) > 1) {
+      stopifnot(length(expected_error_rate) == 1)
+      stopifnot(length(allowed_error_rate) == 1)
+      stopifnot(length(max_n) == 1)
+
+      r <- numeric(length(cert))
+      for (i in seq_along(r)) {
+        r[[i]] <- drawsneeded(
+          expected_error_rate = expected_error_rate,
+          allowed_error_rate = allowed_error_rate,
+          cert = cert[[i]],
+          max_n = max_n
+        )
+      }
+      return(r)
+    }
+
+    # If max_n has length > 1,
+    # map it over drawsneeded().
+    # And return results in 1 vector.
+    if (length(max_n) > 1) {
+      stopifnot(length(expected_error_rate) == 1)
+      stopifnot(length(allowed_error_rate) == 1)
+      stopifnot(length(cert) == 1)
+
+      r <- numeric(length(max_n))
+      for (i in seq_along(r)) {
+        r[[i]] <- drawsneeded(
+          expected_error_rate = expected_error_rate,
+          allowed_error_rate = allowed_error_rate,
+          cert = cert,
+          max_n = max_n[[i]]
+        )
+      }
+      return(r)
     }
   }
-  return(-1)
 
-  # To summarize:
-  # Increasing n, will increase to a lesser extend k, and will increase q.
-  # When n is sufficiently large q will rise above the allowed_error_rate.
-  # That is the value of n we are looking for.
-  # When n rises above the number of samples we are willing to
-  # draw, we return -1.
+  # Non recursive case.
+  {
+    stopifnot(length(expected_error_rate) == 1)
+    stopifnot(length(allowed_error_rate) == 1)
+    stopifnot(length(max_n) == 1)
+    stopifnot(length(cert) == 1)
+
+    # Check parameters.
+    stopifnot(0 <= expected_error_rate)
+    stopifnot(expected_error_rate < 1)
+    stopifnot(0 < allowed_error_rate)
+    stopifnot(allowed_error_rate < 1)
+    stopifnot(expected_error_rate < allowed_error_rate)
+    stopifnot(0 < cert)
+    stopifnot(cert < 1)
+    stopifnot(0 < max_n)
+
+    # We iterate from 1 to max_n to search for the n that will
+    # give a satisfactory level of certainty.
+    # A bit more complex, but more efficient, method would be
+    # to use binary search.
+    # I have not used binary search here to keep the code simple.
+    for (n in 1:max_n) {
+      k <- n * expected_error_rate
+
+      # Compute maximum error rate, q, given certainty level.
+      # We do this using the beta quantile function.
+      # We can interpret cert here as the surface below the chance
+      # density function left of the vertical line error rate == q.
+      q <- qbeta(cert, shape1 = k + 1, shape2 = n - k + 1)
+
+      # pbeta() is the inverse function:
+      # The beta cumulative density function pbeta(), with parameter
+      # q, and the same shape parameters, returns the cert.
+      stopifnot(near(cert, pbeta(
+        q, shape1 = k + 1, shape2 = n - k + 1
+      )))
+
+      if (q < allowed_error_rate) {
+        return(n)
+      }
+    }
+    return(-1)
+
+    # To summarize:
+    # Increasing n, will increase to a lesser extend k, and will increase q.
+    # When n is sufficiently large q will rise above the allowed_error_rate.
+    # That is the value of n we are looking for.
+    # When n rises above the number of samples we are willing to
+    # draw, we return -1.
+  }
 }
 
 #' Graphically show the results of a call to \code{drawsneeded()}
@@ -82,6 +183,8 @@ drawsneeded <- function(expected_error_rate,
 #' chance density graph for k = n*eer, n = n.
 #' The vertical lines to denote expected_error_rate and allowed_error_rate are
 #' also on the graph.
+#'
+#' For the moment there is no support for vector args with length > 1.
 #'
 #' @param expected_error_rate The estimated error rate from earlier knowledge.
 #' @param allowed_error_rate The highest error rate that is still acceptable.
@@ -123,8 +226,18 @@ drawsneeded_plot <- function(expected_error_rate,
                              min_prob = 1.5) {
   # Argument check.
   {
+    # For the moment no support for drawsneeded() args with length > 1.
+    stopifnot(length(expected_error_rate) == 1)
+    stopifnot(length(allowed_error_rate) == 1)
+    stopifnot(length(max_n) == 1)
+    stopifnot(length(cert) == 1)
+
     stopifnot(length(S) == 1)
     stopifnot(posint(S))
+
+    stopifnot(length(min_prob) == 1)
+    stopifnot(is.numeric(min_prob))
+    stopifnot(min_prob >= 0)
 
     # We leave the rest of the argument checking to drawsneeded(), called directly below.
   }
@@ -185,39 +298,30 @@ drawsneeded_plot <- function(expected_error_rate,
     line <- "output:\n"
     lines <- sprintf("%s%s", lines, line)
 
-    line <- sprintf(
-      "     n = estimated number of draws needed = %d\n",
-      n
-    )
+    line <- sprintf("     n = estimated number of draws needed = %d\n", n)
     lines <- sprintf("%s%s", lines, line)
 
     line <- sprintf(
       "     k = estimate of errors that will be found = n * expected_error_rate = %s\n",
-      formatf_without_trailing_zeros(expected_error_rate*n)
+      formatf_without_trailing_zeros(expected_error_rate * n)
     )
     lines <- sprintf("%s%s", lines, line)
 
-    line <- sprintf(
-      "     black dots: postulated error fraction versus probability, given n and k\n"
-    )
+    line <- sprintf("     black dots: postulated error fraction versus probability, given n and k\n")
     lines <- sprintf("%s%s", lines, line)
 
-    line <- sprintf(
-      "     blue vertical line: expected_error_rate\n"
-    )
+    line <- sprintf("     blue vertical line: expected_error_rate\n")
     lines <- sprintf("%s%s", lines, line)
 
-    line <- sprintf(
-      "     red vertical line:  allowed_error_rate\n"
-    )
+    line <- sprintf("     red vertical line:  allowed_error_rate\n")
     lines <- sprintf("%s%s", lines, line)
 
     if (data_rows_available == 0) {
       line <- sprintf(
-      "     NO DATA POINTS SHOWN AS min_prob IS TOO HIGH; PLEASE MAKE min_prob <= %d\n",
-      floor(most_prob_h)
-    )
-    lines <- sprintf("%s%s", lines, line)
+        "     NO DATA POINTS SHOWN AS min_prob IS TOO HIGH; PLEASE MAKE min_prob <= %d\n",
+        floor(most_prob_h)
+      )
+      lines <- sprintf("%s%s", lines, line)
     }
 
     subtitle <- lines
@@ -225,23 +329,23 @@ drawsneeded_plot <- function(expected_error_rate,
 
   # Prepare vertical lines for max values.
   {
-      vline_expected_error_rate <-
-        geom_vline(
-          mapping = NULL,
-          data = NULL,
-          xintercept = expected_error_rate,
-          colour = "blue"
-        )
+    vline_expected_error_rate <-
+      geom_vline(
+        mapping = NULL,
+        data = NULL,
+        xintercept = expected_error_rate,
+        colour = "blue"
+      )
 
 
-      vline_allowed_error_rate <-
-        geom_vline(
-          mapping = NULL,
-          data = NULL,
-          xintercept = allowed_error_rate,
-          colour = "red"
-        )
-    }
+    vline_allowed_error_rate <-
+      geom_vline(
+        mapping = NULL,
+        data = NULL,
+        xintercept = allowed_error_rate,
+        colour = "red"
+      )
+  }
 
 
   # Call ggplot() on prepared data, title, subtitle.

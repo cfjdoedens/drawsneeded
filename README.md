@@ -1,6 +1,10 @@
 
 <!--README.md is generated from README.Rmd. Please edit that file -->
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 # drawsneeded
 
 The pacakage supports monetary unit sampling. In monetary unit sampling
@@ -98,3 +102,8 @@ drawsneeded_plot(expected_error_rate = 0.0, cert = 0.95, allowed_error_rate = 0.
   are needed.
 - drawsneeded_plot() depict as multiple chance graphs different
   postulated values for k, in one picture.
+- There is something very strange in fact going on: you pretend to know
+  something about the file to be audited, i.e. expected_error_rate \> 0
+  at least some times, but you do not want to use that info in the
+  estimation, or is that correct as this only concerns the planning
+  phase? I get a bit confused.

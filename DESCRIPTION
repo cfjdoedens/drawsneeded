@@ -28,4 +28,7 @@ Imports:
     ggplot2,
     tibble, 
     tidyr
+Remotes:
+    cfjdoedens/binompoiscont,
+    cfjdoedens/ewgraph
     
