@@ -92,18 +92,17 @@ drawsneeded_plot(expected_error_rate = 0.0, cert = 0.95, allowed_error_rate = 0.
 
 ## Still TODO
 
-- Make drawsneeded() work nicely with vector parameters that have length
-  \> 1.
 - Handle case where only integer values of k are possible. For example
   when k \> 1 - cert, then round k up. Otherwise round k down.
-- Add extra margin, so extra draws, by taking into account the standard
-  deviation.
-- drawsneeded_plot():If possible, depict situation when too many draws
+- Possibly, add extra margin, so extra draws, by taking into account the
+  standard deviation.
+- There is something strange: you pretend to know something about the
+  file to be audited, i.e. expected_error_rate \> 0, but you do not want
+  to use that info in the estimation, or is that correct as this only
+  concerns the planning phase? I get a bit confused.
+- drawsneeded_plot(): work nicely with parameters of drawsneeded() that
+  have length \> 1.
+- drawsneeded_plot(): if possible, depict situation when too many draws
   are needed.
-- drawsneeded_plot() depict as multiple chance graphs different
+- drawsneeded_plot(): depict as multiple chance graphs different
   postulated values for k, in one picture.
-- There is something very strange in fact going on: you pretend to know
-  something about the file to be audited, i.e. expected_error_rate \> 0
-  at least some times, but you do not want to use that info in the
-  estimation, or is that correct as this only concerns the planning
-  phase? I get a bit confused.
