@@ -3,6 +3,10 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml)
+
+[![Codecov test
+coverage](https://codecov.io/gh/cfjdoedens/drawsneeded/graph/badge.svg)](https://app.codecov.io/gh/cfjdoedens/drawsneeded)
+
 <!-- badges: end -->
 
 # drawsneeded
@@ -88,19 +92,46 @@ drawsneeded_plot(expected_error_rate = 0.0, allowed_error_rate = 0.01, cert = 0.
 
 <img src="man/figures/README-plot-example-no-errors-expected-1.png" width="100%" />
 
-## Example: multiple expected_error_rate s
+## Example: multiple expected_error_rate values
 
 Suppose we want to try several different expected error rates in one go:
 
 ``` r
 drawsneeded(expected_error_rate = seq(from = 0.0, by = 0.001, to = 0.009), allowed_error_rate = 0.01, cert = 0.95, max_n = 10000)
-#>  [1]  298  365  458  594  801 1143 1767 3104 6894   -1
+#>     0 0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 
+#>   298   365   458   594   801  1143  1767  3104  6894    -1
 ```
 
 We see that as expected_error_rate goes near to allowed_error_rate, the
 number of draws needed rises more strongly.
 
 For the moment drawsneeded_plot() can not picture this in one plot.
+
+## Example: multiple allowed_error_rate values
+
+Suppose we want to try several different allowed error rates in one go:
+
+``` r
+drawsneeded(expected_error_rate = 0.001, allowed_error_rate = seq(from = 0.009, by = -0.001, to = 0.002), cert = 0.95, max_n = 10000)
+#> 0.009 0.008 0.007 0.006 0.005 0.004 0.003 0.002 
+#>   415   482   574   708   920  1305  2190  5757
+```
+
+We see, in analogy with the previous example, that as the
+allowed_error_rate comes near to the expected_error_rate, the number of
+draws needed rises.
+
+## Example: multiple cert values
+
+Suppose we want to try several different cert values in one go:
+
+``` r
+drawsneeded(expected_error_rate = 0.001, allowed_error_rate = 0.002, cert = seq(from = 0.60, by = 0.05, to = 0.95), max_n = 10000)
+#>  0.6 0.65  0.7 0.75  0.8 0.85  0.9 0.95 
+#> 1022 1251 1535 1895 2366 3012 3983 5757
+```
+
+We see, that as the cert value increases we need more and more draws.
 
 ## Still TODO
 
@@ -112,7 +143,3 @@ For the moment drawsneeded_plot() can not picture this in one plot.
   file to be audited, i.e. expected_error_rate \> 0, but you do not want
   to use that info in the estimation, or is that correct as this only
   concerns the planning phase? I get a bit confused.
-- drawsneeded_plot(): work nicely with parameters of drawsneeded() that
-  have length \> 1.
-- drawsneeded_plot(): if possible, depict situation when too many draws
-  are needed.

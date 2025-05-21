@@ -6,7 +6,7 @@
 #' the error rate.
 #' This function guesses the number of monetary unit
 #' draws needed
-#' to establish with some certaintity that the error rate is below a certain threshold.
+#' to establish with some certainty that the error rate is below a certain threshold.
 #'
 #' Each of the four arguments can have length > 1, but only one of these
 #' four arguments.
@@ -56,6 +56,10 @@ drawsneeded <- function(expected_error_rate,
           max_n = max_n
         )
       }
+
+      # Add names to r.
+      names(r) <- expected_error_rate
+
       return(r)
     }
 
@@ -76,6 +80,10 @@ drawsneeded <- function(expected_error_rate,
           max_n = max_n
         )
       }
+
+      # Add names to r.
+      names(r) <- allowed_error_rate
+
       return(r)
     }
 
@@ -96,6 +104,10 @@ drawsneeded <- function(expected_error_rate,
           max_n = max_n
         )
       }
+
+      # Add names to r.
+      names(r) <- cert
+
       return(r)
     }
 
@@ -116,6 +128,10 @@ drawsneeded <- function(expected_error_rate,
           max_n = max_n[[i]]
         )
       }
+
+      # Add names to r.
+      names(r) <- max_n
+
       return(r)
     }
   }
@@ -137,265 +153,65 @@ drawsneeded <- function(expected_error_rate,
     stopifnot(cert < 1)
     stopifnot(0 < max_n)
 
-    # We iterate from 1 to max_n to search for the n that will
-    # give a satisfactory level of certainty.
-    # A bit more complex, but more efficient, method would be
-    # to use binary search.
-    # I have not used binary search here to keep the code simple.
-    for (n in 1:max_n) {
-      k <- n * expected_error_rate
+    # Binary search for the smallest n such that
+    # max_error_rate(n, expected_error_rate, cert) <= allowed_error_rate
+    {
+      begin_range <- 1
+      end_range <- max_n
+      if (max_error_rate(end_range, expected_error_rate, cert) > allowed_error_rate) {
+        # The to be found n can not lie in [begin_range, end_range].
+        return(-1)
+      }
 
-      # Compute maximum error rate, q, given certainty level.
-      # We do this using the beta quantile function.
-      # We can interpret cert here as the surface below the chance
-      # density function left of the vertical line error rate == q.
-      q <- qbeta(cert, shape1 = k + 1, shape2 = n - k + 1)
-
-      # pbeta() is the inverse function:
-      # The beta cumulative density function pbeta(), with parameter
-      # q, and the same shape parameters, returns the cert.
-      stopifnot(near(cert, pbeta(
-        q, shape1 = k + 1, shape2 = n - k + 1
-      )))
-
-      stopifnot(length(q) == 1)
-      stopifnot(length(allowed_error_rate) == 1)
-
-      qqq <- q
-      if (qqq < allowed_error_rate) {
-        return(n)
+      # Invariant: the to be found n lies in [begin_range, end_range]
+      while (TRUE) {
+        if (begin_range == end_range) {
+          # Necessarily, the to be found n equals begin_range (and also end_range).
+          return(begin_range)
+        } else  if (begin_range + 1 == end_range ) {
+          # No proper middle.
+          if (max_error_rate(n = begin_range, expected_error_rate, cert) <= allowed_error_rate) {
+            return(begin_range)
+          } else {
+            return(end_range)
+          }
+        } else {
+          # There is a proper middle.
+          middle <- floor((end_range - begin_range) / 2) + begin_range
+          if (max_error_rate(n = middle, expected_error_rate, cert) <= allowed_error_rate) {
+            # We do away with the top half of [begin_range, end_range]
+            end_range <- middle
+            # Invariant: still, the to be found n lies in [begin_range, end_range]
+          } else {
+            # We do away with the bottom half of [begin_range, end_range]
+            begin_range <- middle
+            # Invariant: still, the to be found n lies in [begin_range, end_range]
+          }
+        }
+        # To summarize:
+        # Search for the smallest n for which
+        # max_error_rate(n, expected_error_rate, cert) <= allowed_error_rate,
+        # That is the value of n we are looking for.
       }
     }
-    return(-1)
-
-    # To summarize:
-    # Increasing n, will increase to a lesser extend k, and will increase q.
-    # When n is sufficiently large q will rise above the allowed_error_rate.
-    # That is the value of n we are looking for.
-    # When n rises above the number of samples we are willing to
-    # draw, we return -1.
   }
 }
 
-#' Graphically show the results of a call to \code{drawsneeded()}
-#'
-#' Let r be the result of the call
-#'   n <- drawsneeded(expected_error_rate = eer,
-#'                    allowed_error_rate = aer,
-#'                    cert = c).
-#  If n > 0, show the graph for the binomial distribution the
-#' chance density graph for k = n*eer, n = n.
-#' The vertical lines to denote expected_error_rate and allowed_error_rate are
-#' also on the graph.
-#'
-#' For the moment there is no support for vector args with length > 1.
-#'
-#' @param expected_error_rate The estimated error rate from earlier knowledge.
-#' @param allowed_error_rate The highest error rate that is still acceptable.
-#'     Should be higher than expected_error_rate.
-#' @param cert The certainty level you want, e.g. \code{0.95}.#'
-#' @param max_n The maximum number of samples you are willing to use.
-#' @param S The number of points on the X-axis of the
-#'   plot. but less points might be shown, as only points
-#'   with a probability density >= min_prob are shown.
-#' @param min_prob The minimum probability to be shown in the plot.
-#'
-#' @returns A ggplot.
-#' @export
-#' @examples
-#'   drawsneeded_plot(0.001, 0.02, cert = 0.95, max_n = 500)
-#' @returns
-#'   A ggplot.
-#' @importFrom binompoiscont dbinom_continuous
-#' @importFrom dplyr '%>%'
-#' @importFrom dplyr filter
-#' @importFrom ewgraph ew_from_vec
-#' @importFrom ewgraph ew_get_h
-#' @importFrom ewgraph ew_get_p
-#' @importFrom ewgraph ew_maxcumh_p
-#' @importFrom ewgraph ew_maxh
-#' @importFrom ewgraph ew_round_prob
-#' @importFrom ewgraph partition_0_1
-#' @importFrom ewgraph posint
-#' @import ggplot2
-#' @importFrom tibble tibble
-#' @importFrom tidyr all_of
-#' @importFrom tidyr pivot_longer
-#' @export
-drawsneeded_plot <- function(expected_error_rate,
-                             allowed_error_rate,
-                             cert = 0.95,
-                             max_n = 1000,
-                             S = 10000,
-                             min_prob = 1.5) {
-  # Argument check.
-  {
-    # For the moment no support for drawsneeded() args with length > 1.
-    stopifnot(length(expected_error_rate) == 1)
-    stopifnot(length(allowed_error_rate) == 1)
-    stopifnot(length(max_n) == 1)
-    stopifnot(length(cert) == 1)
+max_error_rate <- function(n, expected_error_rate, cert) {
+  k <- n * expected_error_rate
 
-    stopifnot(length(S) == 1)
-    stopifnot(posint(S))
+  # Compute maximum error rate, q, given certainty level.
+  # We do this using the beta quantile function.
+  # We can interpret cert here as the surface below the chance
+  # density function left of the vertical line error rate == q.
+  q <- qbeta(cert, shape1 = k + 1, shape2 = n - k + 1)
 
-    stopifnot(length(min_prob) == 1)
-    stopifnot(is.numeric(min_prob))
-    stopifnot(min_prob >= 0)
+  # pbeta() is the inverse function:
+  # The beta cumulative density function pbeta(), with parameter
+  # q, and the same shape parameters, returns the cert.
+  stopifnot(near(cert, pbeta(
+    q, shape1 = k + 1, shape2 = n - k + 1
+  )))
 
-    # We leave the rest of the argument checking to drawsneeded(), called directly below.
-  }
-
-  n <- drawsneeded(expected_error_rate, allowed_error_rate, cert, max_n)
-
-  # Create an ew vector g for a binomial graph
-  # with k = expected_error_rate * n, n = n.
-  g <- ew_from_vec(dbinom_continuous(k = expected_error_rate * n, n = n, partition_0_1(S)))
-
-  # Get location, i.e. value of p for most likely error rate.
-  most_prob_p <- ew_maxh(g)[["p"]]
-  most_prob_h <- ew_maxh(g)[["h"]]
-
-  # Get location, i.e. value of p, where the surface under the part
-  # of the chance graph from 0 to p equals cert.
-  max <- ew_maxcumh_p(g, cert)
-
-  # Combine p and h into one tibble.
-  p <- ew_get_p(g)
-  h <- ew_get_h(g)
-  t <- tibble(p, h)
-
-  # Keep only higher chance parts.
-  t <- t %>% filter(h >= min_prob)
-
-  # Count data rows for the plot.
-  data_rows_available <- nrow(t)
-
-  # Make long version of t for plotting.
-  cols <- "h"
-  t <- pivot_longer(t, all_of(cols), names_to = "what", values_to = "prob")
-
-  # Construct title.
-  title <- sprintf("Estimate of number of needed draws")
-
-  # Construct subtitle.
-  {
-    line <- "input:\n"
-    lines <- line
-
-    line <- sprintf(
-      "     expected_error_rate = %s; allowed_error_rate = %s; cert = %s;\n",
-      formatf_without_trailing_zeros(expected_error_rate),
-      formatf_without_trailing_zeros(allowed_error_rate),
-      formatf_without_trailing_zeros(cert)
-    )
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- sprintf(
-      "     max_n = %d; S = %d, min_prob = %s\n",
-      max_n,
-      S,
-      formatf_without_trailing_zeros(min_prob)
-    )
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- "output:\n"
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- sprintf("     n = estimated number of draws needed = %d\n", n)
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- sprintf(
-      "     k = estimate of errors that will be found = n * expected_error_rate = %s\n",
-      formatf_without_trailing_zeros(expected_error_rate * n)
-    )
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- sprintf("     black dots: postulated error fraction versus probability, given n and k\n")
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- sprintf("     blue vertical line: expected_error_rate\n")
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- sprintf("     red vertical line:  allowed_error_rate\n")
-    lines <- sprintf("%s%s", lines, line)
-
-    if (data_rows_available == 0) {
-      line <- sprintf(
-        "     NO DATA POINTS SHOWN AS min_prob IS TOO HIGH; PLEASE MAKE min_prob <= %d\n",
-        floor(most_prob_h)
-      )
-      lines <- sprintf("%s%s", lines, line)
-    }
-
-    subtitle <- lines
-  }
-
-  # Prepare vertical lines for max values.
-  {
-    vline_expected_error_rate <-
-      geom_vline(
-        mapping = NULL,
-        data = NULL,
-        xintercept = expected_error_rate,
-        colour = "blue"
-      )
-
-
-    vline_allowed_error_rate <-
-      geom_vline(
-        mapping = NULL,
-        data = NULL,
-        xintercept = allowed_error_rate,
-        colour = "red"
-      )
-  }
-
-
-  # Call ggplot() on prepared data, title, subtitle.
-  result <- ggplot(data = t) +
-    vline_expected_error_rate +
-    vline_allowed_error_rate +
-    # theme(plot.subtitle = element_textbox_simple()) +
-    # We can not use here:
-    #   geom_point(mapping = aes(x = p, y = prob, color = what)) +
-    # because this will invoke an error message from devtools::check() like:
-    #   no visible binding for global variable ‘prob’
-    # So we use .data$prob instead of prob.
-    # The same for ‘what’.
-    geom_point(mapping = aes(
-      x = p,
-      y = .data$prob#,
-      # color = .data$what
-    )) +
-    # scale_colour_manual(values = scale_color_manual_values,
-    #                     breaks = scale_color_manual_breaks,
-    #                     labels = scale_color_manual_labels) +
-    labs(
-      title = title,
-      subtitle = subtitle,
-      # caption = " ",
-      x = "postulated error fraction",
-      y = "probability"#,
-      # color = "what"
-    )
-
-  return(result)
-}
-
-remove_trailing_zeros <- function(s) {
-  while (nchar(s) > 1) {
-    if (substring(s, nchar(s), nchar(s)) == "0") {
-      s <- substring(s, 1, nchar(s) - 1)
-    } else {
-      return(s)
-    }
-  }
-  return(s)
-}
-
-formatf_without_trailing_zeros <- function(nr) {
-  stopifnot(is.numeric(nr))
-  stopifnot(length(nr) == 1)
-  remove_trailing_zeros(sprintf("%f", nr))
+  return(q)
 }

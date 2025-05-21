@@ -28,7 +28,7 @@ We want to estimate the percentage of money from the file that was wrongfully sp
 the error rate.
 This function guesses the number of monetary unit
 draws needed
-to establish with some certaintity that the error rate is below a certain threshold.
+to establish with some certainty that the error rate is below a certain threshold.
 }
 \details{
 Each of the four arguments can have length > 1, but only one of these

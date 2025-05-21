@@ -44,11 +44,11 @@ test_that("maximally one vector arg with length > 1", {
 })
 
 test_that("first arg has length > 1", {
-  expect_equal(drawsneeded(c(0.02, 0.03), 0.2, 0.95, 500), c(16, 17))
+  expect_equal(drawsneeded(c(0.02, 0.03), 0.2, 0.95, 500), c("0.02" = 16, "0.03" = 17))
 })
 
 test_that("second arg has length > 1", {
-  expect_equal(drawsneeded(0.02, c(0.2, 0.3), 0.95, 500), c(16, 9))
+  expect_equal(drawsneeded(0.02, c(0.2, 0.3), 0.95, 500), c("0.2" = 16, "0.3" = 9))
 })
 
 test_that("third arg has length > 1", {
@@ -57,30 +57,34 @@ test_that("third arg has length > 1", {
       from = 0.05, to = 0.95, by = 0.05
     ), 1000),
     c(
-      1,
-      4,
-      7,
-      10,
-      15,
-      21,
-      28,
-      37,
-      49,
-      64,
-      83,
-      107,
-      138,
-      178,
-      230,
-      300,
-      398,
-      548,
-      825
+      "0.05" = 1,
+      "0.1" = 4,
+      "0.15" = 7,
+      "0.2" = 10,
+      "0.25" = 15,
+      "0.3" = 21,
+      "0.35" = 28,
+      "0.4" = 37,
+      "0.45" = 49,
+      "0.5" = 64,
+      "0.55" = 83,
+      "0.6" = 107,
+      "0.65" = 138,
+      "0.7" = 178,
+      "0.75" = 230,
+      "0.8" = 300,
+      "0.85" = 398,
+      "0.9" = 548,
+      "0.95" = 825
     )
   )
 })
 
 test_that("fourth arg has length > 1", {
-  expect_equal(drawsneeded(0.02, 0.06, 0.95, c(100, 200, 300)), c(-1, 104, 104))
+  expect_equal(drawsneeded(0.02, 0.06, 0.95, c(100, 200, 300)),
+               c(
+                 "100" = -1,
+                 "200" = 104,
+                 "300" = 104
+               ))
 })
-
