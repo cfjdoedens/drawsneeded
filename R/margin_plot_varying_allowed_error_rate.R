@@ -37,113 +37,113 @@ margin_plot_varying_allowed_error_rate <- function(expected_error_rate = 0.01,
   }
 
   # Vary over allowed_error_rate, leave rest of the arguments fixed.
-  # And draw a figure: allowed_error_rate x draws_needed.
+  allowed_error_rate <- partition(begin = expected_error_rate, end = 1, S = S)
+  draws_needed <- drawsneeded(expected_error_rate = expected_error_rate,
+                              allowed_error_rate = allowed_error_rate,
+                              cert,
+                              max_n)
+
+  # Change -1 values from draws_needed to 0.
+  for (i in 1:S) {
+    if (draws_needed[[i]] == -1) {
+      draws_needed[[i]] = 0
+    }
+  }
+
+  # Add vector that describes whether or not there is a value for draws_needed.
+  possible <- logical(S)
+  for (i in 1:S) {
+    if (draws_needed[[i]] == 0) {
+      possible[[i]] = FALSE
+    } else {
+      possible[[i]] <- TRUE
+    }
+
+  }
+
+  # Combine allowed_error_rate and draws_needed into one tibble.
+  t <- tibble(allowed_error_rate, draws_needed, possible)
+
+  # Find highest number of draws, highest_n, and
+  # accompanying error rate, er_highest_n.
+  highest_n <- max(draws_needed)
+  er_highest_n <- allowed_error_rate[[which.max(draws_needed)]]
+
+  # Construct title.
+  title <- sprintf(
+    "varying allowed error rate between expected error rate (%s) and 1",
+    formatf_without_trailing_zeros(expected_error_rate)
+  )
+
+  # Construct subtitle.
   {
-    allowed_error_rate <- partition(begin = expected_error_rate, end = 1, S = S)
-    draws_needed <- drawsneeded(expected_error_rate = expected_error_rate, allowed_error_rate = allowed_error_rate, cert, max_n)
+    lines <- ""
+    line <- sprintf(
+      "     in: expected_error_rate = %s (red dotted line); cert = %s; max_n = %d; S = %d\n",
+      formatf_without_trailing_zeros(expected_error_rate),
+      formatf_without_trailing_zeros(cert),
+      max_n,
+      S
+    )
+    lines <- sprintf("%s%s", lines, line)
 
-    # Change -1 values from draws_needed to 0.
-    for (i in 1:S) {
-      if (draws_needed[[i]] == -1) {
-        draws_needed[[i]] = 0
-      }
-    }
+    line <- sprintf(
+      "     out: highest number of draws = %d; reached for allowed error rate = %s (green line)\n",
+      highest_n,
+      formatf_without_trailing_zeros(er_highest_n)
+    )
+    lines <- sprintf("%s%s", lines, line)
 
-    # Add vector that describes whether or not there is a value for draws_needed.
-    possible <- logical(S)
-    for (i in 1:S) {
-      if (draws_needed[[i]] == 0) {
-        possible[[i]] = FALSE
-      } else {
-        possible[[i]] <- TRUE
-      }
+    subtitle <- lines
+  }
 
-    }
+  # Prepare vertical lines for max values.
+  {
+    vline_er_highest_n <-
+      geom_vline(
+        mapping = NULL,
+        data = NULL,
+        xintercept = er_highest_n,
+        colour = "green"
+      )
 
-    # Combine allowed_error_rate and draws_needed into one tibble.
-    t <- tibble(allowed_error_rate, draws_needed, possible)
 
-    # Find highest number of draws, highest_n, and
-    # accompanying error rate, er_highest_n.
-    highest_n <- max(draws_needed)
-    er_highest_n <- allowed_error_rate[[which.max(draws_needed)]]
+    vline_allowed_error_rate <-
+      geom_vline(
+        mapping = NULL,
+        data = NULL,
+        xintercept = expected_error_rate,
+        colour = "red",
+        linetype = "dotted"
+      )
+  }
 
-    # Construct title.
-    title <- sprintf(
-      "varying allowed error rate between expected error rate (%s) and 1",
-      formatf_without_trailing_zeros(expected_error_rate)
+  # Call ggplot() on prepared data, title, subtitle.
+  result <-
+    ggplot(data = t) +
+    vline_er_highest_n +
+    vline_allowed_error_rate +
+    theme(plot.subtitle = element_text(size = 9, color = "blue")) +
+    geom_point(mapping = aes(
+      x = allowed_error_rate,
+      y = draws_needed,
+      #.data$prob#,
+      #color = possible
+      color = possible
+    )) +
+    scale_colour_manual(
+      values = c("black", "blue") #,
+      # breaks = c(possible) #,
+      # labels = c(possible)
+    ) +
+    labs(
+      title = title,
+      subtitle = subtitle,
+      # caption = "piep",
+      x = "allowed error rate",
+      y = "draws needed"#,
+      # color = "what"
     )
 
-    # Construct subtitle.
-    {
-      lines <- ""
-      line <- sprintf(
-        "     in: expected_error_rate = %s (red dotted line); cert = %s; max_n = %d; S = %d\n",
-        formatf_without_trailing_zeros(expected_error_rate),
-        formatf_without_trailing_zeros(cert),
-        max_n,
-        S
-      )
-      lines <- sprintf("%s%s", lines, line)
-
-      line <- sprintf(
-        "     out: highest number of draws = %d; reached for allowed error rate = %s (green line)\n",
-        highest_n,
-        formatf_without_trailing_zeros(er_highest_n)
-      )
-      lines <- sprintf("%s%s", lines, line)
-
-      subtitle <- lines
-    }
-
-    # Prepare vertical lines for max values.
-    {
-      vline_er_highest_n <-
-        geom_vline(
-          mapping = NULL,
-          data = NULL,
-          xintercept = er_highest_n,
-          colour = "green"
-        )
-
-
-      vline_allowed_error_rate <-
-        geom_vline(
-          mapping = NULL,
-          data = NULL,
-          xintercept = expected_error_rate,
-          colour = "red",
-          linetype = "dotted"
-        )
-    }
-
-    # Call ggplot() on prepared data, title, subtitle.
-    result <-
-      ggplot(data = t) +
-      vline_er_highest_n +
-      vline_allowed_error_rate +
-      theme(plot.subtitle = element_text(size = 9, color = "blue")) +
-      geom_point(mapping = aes(
-        x = allowed_error_rate,
-        y = draws_needed,
-        #.data$prob#,
-        #color = possible
-        color = possible
-      )) +
-      scale_colour_manual(
-        values = c("black", "blue") #,
-        # breaks = c(possible) #,
-        # labels = c(possible)
-      ) +
-      labs(
-        title = title,
-        subtitle = subtitle,
-        # caption = "piep",
-        x = "allowed error rate",
-        y = "draws needed"#,
-        # color = "what"
-      )
-
-    return(result)
-  }
+  return(result)
 }

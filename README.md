@@ -2,6 +2,7 @@
 <!--README.md is generated from README.Rmd. Please edit that file -->
 
 <!-- badges: start -->
+
 [![R-CMD-check](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml)
 
 [![Codecov test
@@ -11,21 +12,43 @@ coverage](https://codecov.io/gh/cfjdoedens/drawsneeded/graph/badge.svg)](https:/
 
 # drawsneeded
 
+## Introduction
+
 Supports monetary unit sampling. In monetary unit sampling we have a
 file of monetary statements. In general this concerns money that has
 been spent. We want to estimate the percentage of money from the file
 that was wrongfully spent, the error rate.
 
-This very tiny package has the function drawsneeded(). The function
-gives an estimate of the number of monetary unit draws needed to
-establish with some certainty that the error rate is below a certain
-threshold.
+This package has the function
 
-This is only a good estimation. Due to randomness, the actual number of
-monetary unit draws needed might be either to low or to high.
+- drawsneeded(expected_error_rate, allowed_error_rate, cert, …)
 
-The package also has the function drawsneeded_plot() which calls
-drawsneeded() and shows the result in a plot.
+The function gives an estimate of the number of monetary unit draws
+needed to establish with some certainty, *cert*, that the error rate is
+below a certain threshold, *allowed_error_rate*. The assumption of
+drawsneeded() is that each drawn statement contains 100 x
+*expected_error_rate* percent error. Most often, in real life, most
+monetary statements will contain no errors at all, and some statements
+will have large errors, or are even totally wrong. Still, we suppose
+that this assumption leaves the estimates of drawsneeded() realistic.
+
+Due to randomness, the actual number of monetary unit draws needed might
+be smaller or bigger. Also, it might turn out, that the file has a
+higher error rate than allowed_error_rate. In that case no amount of
+draws will suffice to prove that the error rate is below
+allowed_error_rate.
+
+The package has a couple of plotting functions:
+
+- drawsneeded_plot()
+- margin_plot_varying_expected_error_rate()
+- margin_plot_varying_allowed_error_rate()
+- margin_plot_varying_cert()
+- combined_plot()
+
+These should give the user insight in the relation between number of
+draws taken and resulting estimates about the error rate in the file
+that is audited.
 
 ## Installation
 
@@ -50,6 +73,8 @@ if (file.exists("/home/crist-jan/R/x86_64-pc-linux-gnu-library/4.5/drawsneeded")
 
 ## Example: 0.1 percent error expected
 
+### expected_error_rate = 0.001, allowed_error_rate = 0.01, cert = 0.95, max_n = 500
+
 Suppose you know from previous experience that a small error rate might
 exist in the mass of monetary statements. You estimate the error rate to
 be no more than 0.1 percent of the total mass in money. So you set
@@ -70,68 +95,202 @@ In a picture this looks like:
 drawsneeded_plot(expected_error_rate = 0.001,  allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
 ```
 
-<img src="man/figures/README-plot-example-tiny-percent-errors-expected-1.png" width="100%" />
+<img src="man/figures/README-tiny-errors-plot-1.png" width="100%" />
+
+We can further analyse the situation by varying over
+expected_error_rate, or over allowed_error_rate or over cert. See the
+following three plots.
+
+### Varying over the expected error rate
+
+First we vary over the expected error rate:
+
+``` r
+margin_plot_varying_expected_error_rate(allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
+```
+
+<img src="man/figures/README-tiny-errors-vary-eer-plot-1.png" width="100%" />
+
+We see that as expected_error_rate goes near to allowed_error_rate, the
+number of draws needed rises.
+
+We can also study this in a non graphical way:
+
+``` r
+drawsneeded(expected_error_rate = seq(from = 0.0, by = 0.001, to = 0.009), allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
+#>     0 0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 
+#>   298   365   458    -1    -1    -1    -1    -1    -1    -1
+```
+
+Again we see that for an expected error rate of 0.001, we need 365
+draws.
+
+### Varying over the allowed error rate
+
+``` r
+margin_plot_varying_allowed_error_rate(expected_error_rate = 0.001, cert = 0.95, max_n = 500)
+```
+
+<img src="man/figures/README-tiny-errors-vary-aer-plot-1.png" width="100%" />
+
+We see that as the allowed_error_rate moves away from the
+expected_error_rate, the number of draws falls sharply.
+
+Non graphically this looks like (note the 365 computed draws needed for
+allowed error rate 0.01):
+
+``` r
+drawsneeded(expected_error_rate = 0.001, allowed_error_rate = seq(from = 0.002, by = 0.001, to = 0.01), cert = 0.95, max_n = 500)
+#> 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009  0.01 
+#>    -1    -1    -1    -1    -1    -1   482   415   365
+```
+
+and,
+
+``` r
+drawsneeded(expected_error_rate = 0.001, allowed_error_rate = seq(from = 0.02, by = 0.01, to = 0.1), cert = 0.95, max_n = 500)
+#> 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09  0.1 
+#>  163  104   76   60   49   42   36   32   28
+```
+
+and,
+
+``` r
+drawsneeded(expected_error_rate = 0.001, allowed_error_rate = seq(from = 0.2, by = 0.1, to = 0.9), cert = 0.95, max_n = 500)
+#> 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 
+#>  13   8   5   4   3   2   1   1
+```
+
+### Varying over the certainty
+
+Finally we can also vary over the certainty we apply.
+
+``` r
+margin_plot_varying_cert(expected_error_rate = 0.001, allowed_error_rate = 0.01, max_n = 500)
+```
+
+<img src="man/figures/README-tiny-errors-vary-cert-plot-1.png" width="100%" />
+
+As might be expected: if we can do with less certainty, then we need
+less draws.
+
+In raw numbers this looks like:
+
+``` r
+drawsneeded(expected_error_rate = 0.001, allowed_error_rate = 0.01, cert = seq(from = 0.50, by = 0.05, to = 0.95), max_n = 500)
+#>  0.5 0.55  0.6 0.65  0.7 0.75  0.8 0.85  0.9 0.95 
+#>   76   88  102  118  137  159  187  223  275  365
+```
+
+Note that for cert 0.95, we get again 365 draws needed.
+
+### All plots bundled in one picture
+
+We can call combined_plots() to get all four plots in one picture.
+However, it is does not look very slick here due to lack of canvas
+space.
+
+``` r
+combined_plots(expected_error_rate = 0.001, allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
+```
+
+<img src="man/figures/README-tiny-errors-all-plots-1.png" width="100%" />
 
 ## Example: no error expected
 
-However, you might expect to see no error at all. Then you could
-calculate as follows:
+### expected_error_rate = 0, allowed_error_rate = 0.01, cert = 0.95, max_n = 500
+
+You might expect to see no error at all in the to be audited file of
+monetary statements. Then you could calculate as follows:
 
 ``` r
-drawsneeded(expected_error_rate = 0.0, allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
+drawsneeded(expected_error_rate = 0, allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
 #> [1] 298
 ```
 
-So probably 298 samples is sufficient.
+So then 298 samples is sufficient.
 
 In a picture this looks like:
 
 ``` r
-drawsneeded_plot(expected_error_rate = 0.0, allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
+drawsneeded_plot(expected_error_rate = 0, allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
 ```
 
-<img src="man/figures/README-plot-example-no-errors-expected-1.png" width="100%" />
+<img src="man/figures/README-zero-errors-plot-1.png" width="100%" />
 
-## Example: multiple expected_error_rate values
+Again, we can further analyse the situation by varying over
+expected_error_rate, or over allowed_error_rate or over cert. As we have
+above already studied varying the expected_error_rate, we will not
+repeat that here.
 
-Suppose we want to try several different expected error rates in one go:
+### Varying over the allowed error rate
 
 ``` r
-drawsneeded(expected_error_rate = seq(from = 0.0, by = 0.001, to = 0.009), allowed_error_rate = 0.01, cert = 0.95, max_n = 10000)
-#>     0 0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 
-#>   298   365   458   594   801  1143  1767  3104  6894    -1
+margin_plot_varying_allowed_error_rate(expected_error_rate = 0, cert = 0.95, max_n = 500)
 ```
 
-We see that as expected_error_rate goes near to allowed_error_rate, the
-number of draws needed rises more strongly.
+<img src="man/figures/README-zero-errors-vary-aer-plot-1.png" width="100%" />
 
-For the moment drawsneeded_plot() can not picture this in one plot.
+We see that as the allowed_error_rate moves away from the
+expected_error_rate, the number of draws falls sharply.
 
-## Example: multiple allowed_error_rate values
-
-Suppose we want to try several different allowed error rates in one go:
+Non graphically this looks like:
 
 ``` r
-drawsneeded(expected_error_rate = 0.001, allowed_error_rate = seq(from = 0.009, by = -0.001, to = 0.002), cert = 0.95, max_n = 10000)
-#> 0.009 0.008 0.007 0.006 0.005 0.004 0.003 0.002 
-#>   415   482   574   708   920  1305  2190  5757
+drawsneeded(expected_error_rate = 0, allowed_error_rate = seq(from = 0.001, by = 0.001, to = 0.01), cert = 0.95, max_n = 500)
+#> 0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009  0.01 
+#>    -1    -1    -1    -1    -1   497   426   372   331   298
 ```
 
-We see, in analogy with the previous example, that as the
-allowed_error_rate comes near to the expected_error_rate, the number of
-draws needed rises.
-
-## Example: multiple cert values
-
-Suppose we want to try several different cert values in one go:
+and,
 
 ``` r
-drawsneeded(expected_error_rate = 0.001, allowed_error_rate = 0.002, cert = seq(from = 0.60, by = 0.05, to = 0.95), max_n = 10000)
-#>  0.6 0.65  0.7 0.75  0.8 0.85  0.9 0.95 
-#> 1022 1251 1535 1895 2366 3012 3983 5757
+drawsneeded(expected_error_rate = 0, allowed_error_rate = seq(from = 0.02, by = 0.01, to = 0.1), cert = 0.95, max_n = 500)
+#> 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09  0.1 
+#>  148   98   73   58   48   41   35   31   28
 ```
 
-We see, that as the cert value increases we need more and more draws.
+and,
+
+``` r
+drawsneeded(expected_error_rate = 0, allowed_error_rate = seq(from = 0.2, by = 0.1, to = 0.9), cert = 0.95, max_n = 500)
+#> 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 
+#>  13   8   5   4   3   2   1   1
+```
+
+### Varying over the certainty
+
+Finally we can also vary over the certainty we apply.
+
+``` r
+margin_plot_varying_cert(expected_error_rate = 0, allowed_error_rate = 0.01, max_n = 500)
+```
+
+<img src="man/figures/README-zero-errors-vary-cert-plot-1.png" width="100%" />
+
+As might be expected: if we can do with less certainty, then we need
+less draws.
+
+In raw numbers this looks like:
+
+``` r
+drawsneeded(expected_error_rate = 0, allowed_error_rate = 0.01, cert = seq(from = 0.50, by = 0.05, to = 0.95), max_n = 500)
+#>  0.5 0.55  0.6 0.65  0.7 0.75  0.8 0.85  0.9 0.95 
+#>   68   79   91  104  119  137  160  188  229  298
+```
+
+We recognize the number 298 as the number of draws needed for cert 0.95.
+
+### All plots bundled in one picture
+
+We call combined_plots() to get all four plots in one picture. Again, it
+is does not look very nice here, because of the cramped space.
+
+``` r
+combined_plots(expected_error_rate = 0, allowed_error_rate = 0.01, cert = 0.95, max_n = 500)
+```
+
+<img src="man/figures/README-zero-errors-all-plots-1.png" width="100%" />
 
 ## Still TODO
 
