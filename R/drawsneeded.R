@@ -57,7 +57,7 @@ drawsneeded <- function(expected_error_rate,
         )
       }
 
-      # Add names to r.
+      # Add expected_error_rate values as names to r.
       names(r) <- expected_error_rate
 
       return(r)

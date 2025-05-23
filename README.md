@@ -21,7 +21,7 @@ that was wrongfully spent, the error rate.
 
 This package has the function
 
-- drawsneeded(expected_error_rate, allowed_error_rate, cert, …)
+- drawsneeded(expected_error_rate, allowed_error_rate, cert, max_n)
 
 The function gives an estimate of the number of monetary unit draws
 needed to establish with some certainty, *cert*, that the error rate is
@@ -50,6 +50,81 @@ These should give the user insight in the relation between number of
 draws taken and resulting estimates about the error rate in the file
 that is audited.
 
+## Interpretation of the value returned by drawsneeded()
+
+As said, the function drawsneeded(expected_error_rate,
+allowed_error_rate, cert, max_n) gives an estimate of the number of
+monetary unit draw items needed to establish with some certainty, cert,
+e.g. 0.95, that the error rate is below allowed_error_rate. For this
+estimation it assumes that the actual error rate in the file of monetary
+statements equals the expected_error_rate.
+
+Of course, this assumption is nearly always wrong as it is highly
+unlikely that the expected error rate equals exactly the actual error
+rate. However, when the expected_error_rate is chosen conservative, i.e.
+on the high side, it can be used with some confidence to produce a not
+too low number.
+
+The function then assumes that each drawn item has an error rate of
+expected_error_rate. And it computes the minimum number of drawn items
+necessary to establish with cert certainty that expected_error_rate \<
+allowed_error_rate.
+
+The computation of this minimum is based on the binomial distribution.
+This is extended with the beta distribution to allow for non integer
+values of errors. (The binomial distribution assumes that there are very
+many items to draw from, which all have equal chance of being drawn, and
+there are so many items that when we have drawn some this does not
+change in a substantial way the rate of erroneous items.)
+
+The idea is that we can in this way estimate the number of to be drawn
+items, to statistically prove that the actual error rate is smaller than
+the allowed error rate. And this without using in the proof any
+knowledge about the expected error rate. To summarize, the function uses
+the expected error rate to compute an estimate of the necessary number
+of to be drawn items, where only these checked items are used to prove
+the value of the error rate of the file of monetary items. So
+expected_error_rate is only used for the planning part!
+
+## Usage
+
+### General
+
+Using drawsneeded() is a simple and cheap way to estimate the effort,
+needed to statistically establish the error rate in a file of financial
+statements.
+
+### No need to stick to the planning for actual drawing and checking
+
+The number that is produced by drawsneeded() gives an estimate of how
+many draws are needed to establish the error rate in a file of financial
+statements. In order to have a statistical sound estimate of the error
+rate of a file of financial statements it is not necessary to stick to
+that planned number for actual drawing and evaluation! The number is
+just an indication of the effort needed.
+
+For example, when drawsneeded() estimates that there are 365 draws
+needed (see one of the examples below), it might turn out that after 298
+draws checked, not one error was found. If the 298 items were chosen
+randomly, based on monetary value, over the total file of monetary
+statements it can be safely concluded that the error rate is not more
+than 1 %. And there is no need to check the other 67 items.
+
+On the other hand, when it turns out that the error rate of the drawn
+and evaluated so far items is above the expected_error_rate, one can do
+a new call on drawsneeded() to establish a new, and forcibly higher,
+number of draws that are needed. The extra items to be drawn should be
+chosen randomly chosen, based on monetary value, over the total file of
+monetary statements.
+
+### Combination with incremental drawing
+
+In order to minimize the number of to be drawn and to be checked
+monetary statements one can explicitly proceed by making an optimistic,
+i.e. low, guess of the expected_error_rate, and once this indeed turns
+out to be too optimistic, plan anew as described above with the actual
+error rate found in the already checked monetary statements.
+
 ## Installation
 
 You can install the development version of drawsneeded from
@@ -73,7 +148,7 @@ if (file.exists("/home/crist-jan/R/x86_64-pc-linux-gnu-library/4.5/drawsneeded")
 
 ## Example: 0.1 percent error expected
 
-### expected_error_rate = 0.001, allowed_error_rate = 0.01, cert = 0.95, max_n = 500
+### expected_error_rate = *0.001*, allowed_error_rate = 0.01, cert = 0.95, max_n = 500
 
 Suppose you know from previous experience that a small error rate might
 exist in the mass of monetary statements. You estimate the error rate to
@@ -268,8 +343,7 @@ margin_plot_varying_cert(expected_error_rate = 0, allowed_error_rate = 0.01, max
 
 <img src="man/figures/README-zero-errors-vary-cert-plot-1.png" width="100%" />
 
-As might be expected: if we can do with less certainty, then we need
-less draws.
+As might be expected: more certainty needs more draws.
 
 In raw numbers this looks like:
 
@@ -292,13 +366,15 @@ combined_plots(expected_error_rate = 0, allowed_error_rate = 0.01, cert = 0.95, 
 
 <img src="man/figures/README-zero-errors-all-plots-1.png" width="100%" />
 
-## Still TODO
+## Suggested extensions
 
 - Handle case where only integer values of k are possible. For example
   when k \> 1 - cert, then round k up. Otherwise round k down.
-- Possibly, add extra margin, so extra draws, by taking into account the
-  standard deviation.
-- There is something strange: you pretend to know something about the
-  file to be audited, i.e. expected_error_rate \> 0, but you do not want
-  to use that info in the estimation, or is that correct as this only
-  concerns the planning phase? I get a bit confused.
+- In extension to the above: Handle the case where per audited monetary
+  statement only error rates of fixed size are possible. E.g. a monetary
+  statement has as only possible error rates: 0.25, 0.5, 0.75 and 1.0.
+- Add extra margin, so extra draws, by taking into account the standard
+  deviation.
+- Add a prior to drawsneeded().
+- Add a cost function that makes additional draws more expensive. The
+  function can help with planning of incremental drawing.
