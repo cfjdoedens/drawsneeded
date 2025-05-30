@@ -5,23 +5,20 @@
 \title{Graphically show the results of a call to \code{drawsneeded()}}
 \usage{
 drawsneeded_plot(
-  expected_error_rate,
-  allowed_error_rate,
+  posited_defect_rate,
+  allowed_defect_rate,
   cert = 0.95,
-  max_n = 1000,
-  S = 10000,
+  S = 1e+05,
   min_prob = 1.5
 )
 }
 \arguments{
-\item{expected_error_rate}{The estimated error rate from earlier knowledge.}
+\item{posited_defect_rate}{The estimated defect rate from earlier knowledge.}
 
-\item{allowed_error_rate}{The highest error rate that is still acceptable.
-Should be higher than expected_error_rate.}
+\item{allowed_defect_rate}{The highest defect rate that is still acceptable.
+Should be higher than posited_defect_rate.}
 
 \item{cert}{The certainty level you want, e.g. \code{0.95}.#'}
-
-\item{max_n}{The maximum number of samples you are willing to use.}
 
 \item{S}{The number of points on the X-axis of the
 plot. but less points might be shown, as only points
@@ -36,17 +33,19 @@ A ggplot.
 A ggplot.
 }
 \description{
-Let r be the result of the call
-  n <- drawsneeded(expected_error_rate = eer,
-                   allowed_error_rate = aer,
+Let n be the result of the call
+  n <- drawsneeded(posited_defect_rate = eer,
+                   allowed_defect_rate = aer,
                    cert = c).
 chance density graph for k = n*eer, n = n.
-The vertical lines to denote expected_error_rate and allowed_error_rate are
+The vertical lines to denote posited_defect_rate and allowed_defect_rate are
 also on the graph.
 }
 \details{
+If n < 1, show a diagnostic message.
+
 There is no support for vector args with length > 1.
 }
 \examples{
-  drawsneeded_plot(0.001, 0.02, cert = 0.95, max_n = 500)
+  drawsneeded_plot(0.001, 0.02, cert = 0.95)
 }

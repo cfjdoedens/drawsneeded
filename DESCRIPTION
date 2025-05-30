@@ -1,6 +1,6 @@
 Package: drawsneeded
 Type: Package
-Title: Estimates the number of samples at least needed to ascertain a minimum error
+Title: Estimates the number of samples needed to ascertain that the defect rate does not exceed a treshold
 Version: 0.1.0
 Authors@R: c(
     person(
@@ -9,10 +9,10 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: In an audit of monetary expenses we might use sampling to establish
-   an estimate of the error rate in a mass of monetary transactions.
-   For planning the number of necessary samples we can use the function exported by
-   this tiny package.
+Description: In an audit of a file of like items, we might use sampling to establish
+   an estimate of the overall defect rate.
+   Computes an estimate of the necessary number of sampled items given a posited defect rate,
+   and a maximally acceptable defect rate.
 License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.2

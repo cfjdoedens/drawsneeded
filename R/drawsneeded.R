@@ -1,88 +1,80 @@
-#' compute number of samples needed to establish maximum error level with enough certainty
+#' compute number of samples needed to establish maximum defect rate with enough certainty
 #'
-#' In monetary unit sampling we have a file of monetary statements.
-#' In general this concerns money that has been spent.
-#' We want to estimate the percentage of money from the file that was wrongfully spent,
-#' the error rate.
-#' This function guesses the number of monetary unit
-#' draws needed
-#' to establish with some certainty that the error rate is below a certain threshold.
+#' In sampling we have a file of like items.
+#' We want to estimate the overall defect rate of  the items.
+#' This function guesses the number of draws needed
+#' to establish with some certainty that the defect rate is below a certain threshold.
 #'
-#' Each of the four arguments can have length > 1, but only one of these
-#' four arguments.
+#' Each of the three arguments can have length > 1, but only one of these
+#' three arguments.
 #'
-#' @param expected_error_rate The estimated error rate from earlier knowledge.
-#' @param allowed_error_rate The highest error rate that is still acceptable.
-#'     So the treshold.
-#'     Should be higher than expected_error_rate.
+#' @param posited_defect_rate The defect rate of which we want to see how many
+#'     samples it would take to establish that it is below the allowed defect rate.
+#'     Could for example be our guess of the defect rate.
+#' @param allowed_defect_rate The highest defect rate that is still acceptable.
+#'     So the threshold.
+#'     Should be higher than posited_defect_rate.
 #' @param cert The certainty level you want, e.g. \code{0.95}.
-#' @param max_n The maximum number of samples you are willing to use.
 #'
-#' @returns An estimate of the needed number of samples. Or \code{-1} if the maximum number
-#'     of samples needed is higher than max_n.
+#' @returns An estimate of the needed number of samples. If the number of
+#'     needed samples comes to close to the maximum integer value, return -1.
 #' @export
 #' @importFrom stats qbeta
 #' @importFrom stats pbeta
 #' @importFrom dplyr near
 #' @examples
-#'   x <- drawsneeded(0.001, 0.02, cert = 0.95, max_n = 500)
-drawsneeded <- function(expected_error_rate,
-                        allowed_error_rate,
-                        cert = 0.95,
-                        max_n = 1000) {
+#'   x <- drawsneeded(0.001, 0.02, cert = 0.95)
+drawsneeded <- function(posited_defect_rate,
+                        allowed_defect_rate,
+                        cert = 0.95) {
   # We first handle recursion :-) .
   {
-    # Check that all 4 arguments are numeric vectors.
-    stopifnot(is.numeric(expected_error_rate))
-    stopifnot(is.numeric(allowed_error_rate))
+    # Check that all 3 arguments are numeric vectors.
+    stopifnot(is.numeric(posited_defect_rate))
+    stopifnot(is.numeric(allowed_defect_rate))
     stopifnot(is.numeric(cert))
-    stopifnot(is.numeric(max_n))
 
-    # If expected_error_rate has length > 1,
+    # If posited_defect_rate has length > 1,
     # map it over drawsneeded().
     # And return results in 1 vector.
-    if (length(expected_error_rate) > 1) {
-      stopifnot(length(allowed_error_rate) == 1)
+    if (length(posited_defect_rate) > 1) {
+      stopifnot(length(allowed_defect_rate) == 1)
       stopifnot(length(cert) == 1)
-      stopifnot(length(max_n) == 1)
 
-      r <- numeric(length(expected_error_rate))
+      r <- numeric(length(posited_defect_rate))
       for (i in seq_along(r)) {
-        stopifnot(length(expected_error_rate[[i]]) == 1)
+        stopifnot(length(posited_defect_rate[[i]]) == 1)
         r[[i]] <- drawsneeded(
-          expected_error_rate = expected_error_rate[[i]],
-          allowed_error_rate = allowed_error_rate,
-          cert = cert,
-          max_n = max_n
+          posited_defect_rate = posited_defect_rate[[i]],
+          allowed_defect_rate = allowed_defect_rate,
+          cert = cert
         )
       }
 
-      # Add expected_error_rate values as names to r.
-      names(r) <- expected_error_rate
+      # Add posited_defect_rate values as names to r.
+      names(r) <- posited_defect_rate
 
       return(r)
     }
 
-    # If allowed_error_rate has length > 1,
+    # If allowed_defect_rate has length > 1,
     # map it over drawsneeded().
     # And return results in 1 vector.
-    if (length(allowed_error_rate) > 1) {
-      stopifnot(length(expected_error_rate) == 1)
+    if (length(allowed_defect_rate) > 1) {
+      stopifnot(length(posited_defect_rate) == 1)
       stopifnot(length(cert) == 1)
-      stopifnot(length(max_n) == 1)
 
-      r <- numeric(length(allowed_error_rate))
+      r <- numeric(length(allowed_defect_rate))
       for (i in seq_along(r)) {
         r[[i]] <- drawsneeded(
-          expected_error_rate = expected_error_rate,
-          allowed_error_rate = allowed_error_rate[[i]],
-          cert = cert,
-          max_n = max_n
+          posited_defect_rate = posited_defect_rate,
+          allowed_defect_rate = allowed_defect_rate[[i]],
+          cert = cert
         )
       }
 
       # Add names to r.
-      names(r) <- allowed_error_rate
+      names(r) <- allowed_defect_rate
 
       return(r)
     }
@@ -91,17 +83,15 @@ drawsneeded <- function(expected_error_rate,
     # map it over drawsneeded().
     # And return results in 1 vector.
     if (length(cert) > 1) {
-      stopifnot(length(expected_error_rate) == 1)
-      stopifnot(length(allowed_error_rate) == 1)
-      stopifnot(length(max_n) == 1)
+      stopifnot(length(posited_defect_rate) == 1)
+      stopifnot(length(allowed_defect_rate) == 1)
 
       r <- numeric(length(cert))
       for (i in seq_along(r)) {
         r[[i]] <- drawsneeded(
-          expected_error_rate = expected_error_rate,
-          allowed_error_rate = allowed_error_rate,
-          cert = cert[[i]],
-          max_n = max_n
+          posited_defect_rate = posited_defect_rate,
+          allowed_defect_rate = allowed_defect_rate,
+          cert = cert[[i]]
         )
       }
 
@@ -110,55 +100,30 @@ drawsneeded <- function(expected_error_rate,
 
       return(r)
     }
-
-    # If max_n has length > 1,
-    # map it over drawsneeded().
-    # And return results in 1 vector.
-    if (length(max_n) > 1) {
-      stopifnot(length(expected_error_rate) == 1)
-      stopifnot(length(allowed_error_rate) == 1)
-      stopifnot(length(cert) == 1)
-
-      r <- numeric(length(max_n))
-      for (i in seq_along(r)) {
-        r[[i]] <- drawsneeded(
-          expected_error_rate = expected_error_rate,
-          allowed_error_rate = allowed_error_rate,
-          cert = cert,
-          max_n = max_n[[i]]
-        )
-      }
-
-      # Add names to r.
-      names(r) <- max_n
-
-      return(r)
-    }
   }
 
   # Non recursive case.
   {
-    stopifnot(length(expected_error_rate) == 1)
-    stopifnot(length(allowed_error_rate) == 1)
-    stopifnot(length(max_n) == 1)
+    stopifnot(length(posited_defect_rate) == 1)
+    stopifnot(length(allowed_defect_rate) == 1)
     stopifnot(length(cert) == 1)
 
     # Check parameters.
-    stopifnot(0 <= expected_error_rate)
-    stopifnot(expected_error_rate < 1)
-    stopifnot(0 < allowed_error_rate)
-    stopifnot(allowed_error_rate < 1)
-    stopifnot(expected_error_rate < allowed_error_rate)
+    stopifnot(0 <= posited_defect_rate)
+    stopifnot(posited_defect_rate < 1)
+    stopifnot(0 < allowed_defect_rate)
+    stopifnot(allowed_defect_rate < 1)
+    stopifnot(posited_defect_rate < allowed_defect_rate)
     stopifnot(0 < cert)
     stopifnot(cert < 1)
-    stopifnot(0 < max_n)
 
     # Binary search for the smallest n such that
-    # max_error_rate(n, expected_error_rate, cert) <= allowed_error_rate
+    # max_defect_rate(n, posited_defect_rate, cert) <= allowed_defect_rate
     {
+      max_n <- floor(.Machine$integer.max/2) # Largest R integer/2.
       begin_range <- 1
       end_range <- max_n
-      if (max_error_rate(end_range, expected_error_rate, cert) > allowed_error_rate) {
+      if (max_defect_rate(end_range, posited_defect_rate, cert) > allowed_defect_rate) {
         # The to be found n can not lie in [begin_range, end_range].
         return(-1)
       }
@@ -168,9 +133,9 @@ drawsneeded <- function(expected_error_rate,
         if (begin_range == end_range) {
           # Necessarily, the to be found n equals begin_range (and also end_range).
           return(begin_range)
-        } else  if (begin_range + 1 == end_range ) {
+        } else  if (begin_range + 1 == end_range) {
           # No proper middle.
-          if (max_error_rate(n = begin_range, expected_error_rate, cert) <= allowed_error_rate) {
+          if (max_defect_rate(n = begin_range, posited_defect_rate, cert) <= allowed_defect_rate) {
             return(begin_range)
           } else {
             return(end_range)
@@ -178,7 +143,7 @@ drawsneeded <- function(expected_error_rate,
         } else {
           # There is a proper middle.
           middle <- floor((end_range - begin_range) / 2) + begin_range
-          if (max_error_rate(n = middle, expected_error_rate, cert) <= allowed_error_rate) {
+          if (max_defect_rate(n = middle, posited_defect_rate, cert) <= allowed_defect_rate) {
             # We do away with the top half of [begin_range, end_range]
             end_range <- middle
             # Invariant: still, the to be found n lies in [begin_range, end_range]
@@ -190,20 +155,21 @@ drawsneeded <- function(expected_error_rate,
         }
         # To summarize:
         # Search for the smallest n for which
-        # max_error_rate(n, expected_error_rate, cert) <= allowed_error_rate,
+        # max_defect_rate(n, posited_defect_rate, cert) <= allowed_defect_rate,
         # That is the value of n we are looking for.
       }
     }
   }
 }
 
-max_error_rate <- function(n, expected_error_rate, cert) {
-  k <- n * expected_error_rate
+max_defect_rate <- function(n, posited_defect_rate, cert) {
+  k <- n * posited_defect_rate
 
-  # Compute maximum error rate, q, given certainty level.
+  # Compute maximum defect rate, q, given certainty level.
   # We do this using the beta quantile function.
   # We can interpret cert here as the surface below the chance
-  # density function left of the vertical line error rate == q.
+  # density function left of the vertical line defect rate == q.
+  # print(c(cert, k + 1, n - k + 1))
   q <- qbeta(cert, shape1 = k + 1, shape2 = n - k + 1)
 
   # pbeta() is the inverse function:
@@ -212,6 +178,7 @@ max_error_rate <- function(n, expected_error_rate, cert) {
   stopifnot(near(cert, pbeta(
     q, shape1 = k + 1, shape2 = n - k + 1
   )))
+  # print(c(q,n))
 
   return(q)
 }

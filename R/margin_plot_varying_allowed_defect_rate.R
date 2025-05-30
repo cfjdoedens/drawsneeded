@@ -1,16 +1,19 @@
-#' Show in plot how allowed error rate influences draws needed
+#' Show in plot how allowed defect rate influences draws needed
 #'
 #' The plot is based on varying the variable
-#' allowed_error_rate in a call to drawsneeded(expected_error_rate, allowed_error_rate, cert, max_n)
+#' allowed_defect_rate in a call to drawsneeded(posited_defect_rate, allowed_defect_rate, cert)
 #'
-#' @param expected_error_rate The estimated error rate from earlier knowledge.
+#' To keep the plot interesting, only the points representing up to
+#' max_n draws are shown.
+#'
+#' @param posited_defect_rate The estimated defect rate from earlier knowledge.
 #' @param cert The certainty level you want, e.g. \code{0.95}.
-#' @param max_n The maximum number of samples you are willing to use.
+#' @param max_n The number of to be drawn items maximally shown in the plot.
 #' @param S The number of points on the X-axis of the
 #'     plot.
 #'
 #' @examples
-#'   margin_plot_varying_allowed_error_rate(expected_error_rate = 0.01, cert = 0.95, max_n = 500)
+#'   margin_plot_varying_allowed_defect_rate(posited_defect_rate = 0.01, cert = 0.95)
 #' @returns
 #'   A ggplot.
 #' @importFrom ewgraph partition
@@ -18,77 +21,76 @@
 #' @import ggplot2
 #' @importFrom tibble tibble
 #' @export
-margin_plot_varying_allowed_error_rate <- function(expected_error_rate = 0.01,
+margin_plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
                                                    cert = 0.95,
                                                    max_n = 1000,
                                                    S = 10000) {
   # Argument check.
   {
     # No support for drawsneeded() args with length > 1.
-    stopifnot(length(expected_error_rate) == 1)
+    stopifnot(length(posited_defect_rate) == 1)
     stopifnot(length(cert) == 1)
-    stopifnot(length(max_n) == 1)
 
-    # check of specific arguments to margin_plot_varying_allowed_error_rate().
+    # check of specific arguments to margin_plot_varying_allowed_defect_rate().
+    stopifnot(length(max_n) == 1)
+    stopifnot(posint(max_n))
     stopifnot(length(S) == 1)
     stopifnot(posint(S))
 
     # We leave the rest of the argument checking to drawsneeded(), called directly below.
   }
 
-  # Vary over allowed_error_rate, leave rest of the arguments fixed.
-  allowed_error_rate <- partition(begin = expected_error_rate, end = 1, S = S)
-  draws_needed <- drawsneeded(expected_error_rate = expected_error_rate,
-                              allowed_error_rate = allowed_error_rate,
-                              cert,
-                              max_n)
+  # Vary over allowed_defect_rate, leave rest of the arguments fixed.
+  allowed_defect_rate <- partition(begin = posited_defect_rate, end = 1, S = S)
+  draws_needed <- drawsneeded(posited_defect_rate = posited_defect_rate,
+                              allowed_defect_rate = allowed_defect_rate,
+                              cert)
 
-  # Change -1 values from draws_needed to 0.
+  # Change values from draws_needed > max_n to 0.
   for (i in 1:S) {
-    if (draws_needed[[i]] == -1) {
-      draws_needed[[i]] = 0
+    if (draws_needed[[i]] > max_n) {
+      draws_needed[[i]] <- 0
     }
   }
 
   # Add vector that describes whether or not there is a value for draws_needed.
   possible <- logical(S)
   for (i in 1:S) {
-    if (draws_needed[[i]] == 0) {
+    if (draws_needed[[i]] <= 0) {
       possible[[i]] = FALSE
     } else {
       possible[[i]] <- TRUE
     }
-
   }
 
-  # Combine allowed_error_rate and draws_needed into one tibble.
-  t <- tibble(allowed_error_rate, draws_needed, possible)
+  # Combine allowed_defect_rate and draws_needed into one tibble.
+  t <- tibble(allowed_defect_rate, draws_needed, possible)
 
   # Find highest number of draws, highest_n, and
-  # accompanying error rate, er_highest_n.
+  # accompanying defect rate, er_highest_n.
   highest_n <- max(draws_needed)
-  er_highest_n <- allowed_error_rate[[which.max(draws_needed)]]
+  er_highest_n <- allowed_defect_rate[[which.max(draws_needed)]]
 
   # Construct title.
   title <- sprintf(
-    "varying allowed error rate between expected error rate (%s) and 1",
-    formatf_without_trailing_zeros(expected_error_rate)
+    "varying allowed defect rate between posited defect rate (%s) and 1,\nshown up to %d draws",
+    formatf_without_trailing_zeros(posited_defect_rate),
+    max_n
   )
 
   # Construct subtitle.
   {
     lines <- ""
     line <- sprintf(
-      "     in: expected_error_rate = %s (red dotted line); cert = %s; max_n = %d; S = %d\n",
-      formatf_without_trailing_zeros(expected_error_rate),
+      "     in: posited_defect_rate = %s (red dotted line); cert = %s; S = %d\n",
+      formatf_without_trailing_zeros(posited_defect_rate),
       formatf_without_trailing_zeros(cert),
-      max_n,
       S
     )
     lines <- sprintf("%s%s", lines, line)
 
     line <- sprintf(
-      "     out: highest number of draws = %d; reached for allowed error rate = %s (green line)\n",
+      "     out: highest number of draws = %d; reached for allowed defect rate = %s (green line)\n",
       highest_n,
       formatf_without_trailing_zeros(er_highest_n)
     )
@@ -108,11 +110,11 @@ margin_plot_varying_allowed_error_rate <- function(expected_error_rate = 0.01,
       )
 
 
-    vline_allowed_error_rate <-
+    vline_allowed_defect_rate <-
       geom_vline(
         mapping = NULL,
         data = NULL,
-        xintercept = expected_error_rate,
+        xintercept = posited_defect_rate,
         colour = "red",
         linetype = "dotted"
       )
@@ -122,17 +124,16 @@ margin_plot_varying_allowed_error_rate <- function(expected_error_rate = 0.01,
   result <-
     ggplot(data = t) +
     vline_er_highest_n +
-    vline_allowed_error_rate +
+    vline_allowed_defect_rate +
     theme(plot.subtitle = element_text(size = 9, color = "blue")) +
     geom_point(mapping = aes(
-      x = allowed_error_rate,
+      x = allowed_defect_rate,
       y = draws_needed,
       #.data$prob#,
       #color = possible
       color = possible
     )) +
-    scale_colour_manual(
-      values = c("black", "blue") #,
+    scale_colour_manual(values = c(`TRUE` = "blue", `FALSE` = "transparent"), guide = "none" #,
       # breaks = c(possible) #,
       # labels = c(possible)
     ) +
@@ -140,7 +141,7 @@ margin_plot_varying_allowed_error_rate <- function(expected_error_rate = 0.01,
       title = title,
       subtitle = subtitle,
       # caption = "piep",
-      x = "allowed error rate",
+      x = "allowed defect rate",
       y = "draws needed"#,
       # color = "what"
     )

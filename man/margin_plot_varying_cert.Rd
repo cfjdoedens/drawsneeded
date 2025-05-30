@@ -2,23 +2,23 @@
 % Please edit documentation in R/margin_plot_varying_cert.R
 \name{margin_plot_varying_cert}
 \alias{margin_plot_varying_cert}
-\title{Show in plot how varying allowed error rate influences draws needed}
+\title{Show in plot how varying allowed defect rate influences draws needed}
 \usage{
 margin_plot_varying_cert(
-  expected_error_rate = 0.01,
-  allowed_error_rate = 0.02,
+  posited_defect_rate = 0.01,
+  allowed_defect_rate = 0.02,
   max_n = 1000,
   S = 10000
 )
 }
 \arguments{
-\item{expected_error_rate}{The estimated error rate from earlier knowledge.
-Should be lower than allowed_error_rate.}
+\item{posited_defect_rate}{The proposed defect rate.
+Should be lower than allowed_defect_rate.}
 
-\item{allowed_error_rate}{The highest error rate that is still acceptable.
-Should be higher than expected_error_rate.}
+\item{allowed_defect_rate}{The highest defect rate that is still acceptable.
+Should be higher than posited_defect_rate.}
 
-\item{max_n}{The maximum number of samples you are willing to use.}
+\item{max_n}{The number of to be drawn items maximally shown in the plot.#'}
 
 \item{S}{The number of points on the X-axis of the
 plot.}
@@ -28,8 +28,12 @@ A ggplot.
 }
 \description{
 The plot is based on varying the variable
-allowed_error_rate in a call to drawsneeded(expected_error_rate, allowed_error_rate, cert, max_n)
+allowed_defect_rate in a call to drawsneeded(posited_defect_rate, allowed_defect_rate, cert).
+}
+\details{
+To keep the plot interesting, only the points representing up to
+max_n draws are shown.
 }
 \examples{
-  margin_plot_varying_cert(expected_error_rate = 0.01, allowed_error_rate = 0.02, max_n = 500)
+  margin_plot_varying_cert(posited_defect_rate = 0.01, allowed_defect_rate = 0.02)
 }

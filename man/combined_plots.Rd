@@ -5,8 +5,8 @@
 \title{Graphically analyse through multiple plots a call to \code{drawsneeded()}}
 \usage{
 combined_plots(
-  expected_error_rate,
-  allowed_error_rate,
+  posited_defect_rate,
+  allowed_defect_rate,
   cert = 0.95,
   max_n = 1000,
   S = 10000,
@@ -14,14 +14,14 @@ combined_plots(
 )
 }
 \arguments{
-\item{expected_error_rate}{The estimated error rate from earlier knowledge.}
+\item{posited_defect_rate}{The estimated defect rate from earlier knowledge.}
 
-\item{allowed_error_rate}{The highest error rate that is still acceptable.
-Should be higher than expected_error_rate.}
+\item{allowed_defect_rate}{The highest defect rate that is still acceptable.
+Should be higher than posited_defect_rate.}
 
 \item{cert}{The certainty level you want, e.g. \code{0.95}.}
 
-\item{max_n}{The maximum number of samples you are willing to use.}
+\item{max_n}{The number of to be drawn items maximally shown in the plot.}
 
 \item{S}{The number of points on the X-axis of the
 plot.}
@@ -37,16 +37,16 @@ A ggplot.
 \description{
 Show in one figure the result of a call to \code{drawsneeded()} by means of four plots.
 The first plot shows what chance graph will result if the foreseen number of
-errors do indeed emerge by drawing and checking the planned number of
+defects do indeed emerge by drawing and checking the planned number of
 monetary units.
 }
 \details{
 The other three plots analyse the influence of respectively the parameters
-\code{expected_error_rate}, \code{allowed_error_rate} and \code{cert} on the number of
+\code{posited_defect_rate}, \code{allowed_defect_rate} and \code{cert} on the number of
 draws needed. "Draws needed": meaning here the number of draws needed to have
 enough random monetary units seen, to conclude with certainty cert
-that the error rate in the monetary unit lies below the allowed_error_rate.
+that the defect rate in the monetary unit lies below the allowed_defect_rate.
 }
 \examples{
-  combined_plots(0.001, 0.02, cert = 0.95, max_n = 500)
+  combined_plots(0.001, 0.02, cert = 0.95)
 }

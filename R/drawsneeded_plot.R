@@ -1,21 +1,22 @@
 #' Graphically show the results of a call to \code{drawsneeded()}
 #'
-#' Let r be the result of the call
-#'   n <- drawsneeded(expected_error_rate = eer,
-#'                    allowed_error_rate = aer,
+#' Let n be the result of the call
+#'   n <- drawsneeded(posited_defect_rate = eer,
+#'                    allowed_defect_rate = aer,
 #'                    cert = c).
-#  If n > 0, show the graph for the binomial distribution the
+#  If n >= 1, show the binomial
 #' chance density graph for k = n*eer, n = n.
-#' The vertical lines to denote expected_error_rate and allowed_error_rate are
+#' The vertical lines to denote posited_defect_rate and allowed_defect_rate are
 #' also on the graph.
+#'
+#' If n < 1, show a diagnostic message.
 #'
 #' There is no support for vector args with length > 1.
 #'
-#' @param expected_error_rate The estimated error rate from earlier knowledge.
-#' @param allowed_error_rate The highest error rate that is still acceptable.
-#'     Should be higher than expected_error_rate.
+#' @param posited_defect_rate The estimated defect rate from earlier knowledge.
+#' @param allowed_defect_rate The highest defect rate that is still acceptable.
+#'     Should be higher than posited_defect_rate.
 #' @param cert The certainty level you want, e.g. \code{0.95}.#'
-#' @param max_n The maximum number of samples you are willing to use.
 #' @param S The number of points on the X-axis of the
 #'     plot. but less points might be shown, as only points
 #'     with a probability density >= min_prob are shown.
@@ -25,7 +26,7 @@
 #' @returns A ggplot.
 #' @export
 #' @examples
-#'   drawsneeded_plot(0.001, 0.02, cert = 0.95, max_n = 500)
+#'   drawsneeded_plot(0.001, 0.02, cert = 0.95)
 #' @returns
 #'   A ggplot.
 #' @importFrom binompoiscont dbinom_continuous
@@ -39,20 +40,19 @@
 #' @importFrom ewgraph partition_0_1
 #' @importFrom ewgraph posint
 #' @import ggplot2
+#' @importFrom grDevices rgb
 #' @importFrom tibble tibble
 #' @export
-drawsneeded_plot <- function(expected_error_rate,
-                             allowed_error_rate,
+drawsneeded_plot <- function(posited_defect_rate,
+                             allowed_defect_rate,
                              cert = 0.95,
-                             max_n = 1000,
-                             S = 10000,
+                             S = 1e5,
                              min_prob = 1.5) {
   # Argument check.
   {
     # No support for drawsneeded() args with length > 1.
-    stopifnot(length(expected_error_rate) == 1)
-    stopifnot(length(allowed_error_rate) == 1)
-    stopifnot(length(max_n) == 1)
+    stopifnot(length(posited_defect_rate) == 1)
+    stopifnot(length(allowed_defect_rate) == 1)
     stopifnot(length(cert) == 1)
 
     # Check on arguments specific to drawsneeded_plot().
@@ -65,128 +65,285 @@ drawsneeded_plot <- function(expected_error_rate,
     # We leave the rest of the argument checking to drawsneeded(), called directly below.
   }
 
-  n <- drawsneeded(expected_error_rate, allowed_error_rate, cert, max_n)
+  n <- drawsneeded(posited_defect_rate, allowed_defect_rate, cert)
 
-  # Create an ew vector g for a binomial graph
-  # with k = expected_error_rate * n, n = n.
-  g <- ew_from_vec(dbinom_continuous(k = expected_error_rate * n, n = n, partition_0_1(S)))
+  if (n >= 1) {
+    # Create an ew vector g for a binomial graph
+    # with k = posited_defect_rate * n, n = n.
+    g <- ew_from_vec(dbinom_continuous(k = posited_defect_rate * n, n = n, partition_0_1(S)))
 
-  # Get location, i.e. value of p for most likely error rate.
-  most_prob_p <- ew_maxh(g)[["p"]]
-  most_prob_h <- ew_maxh(g)[["h"]]
+    # Get location, i.e. value of p for most likely defect rate.
+    most_prob_p <- ew_maxh(g)[["p"]]
+    most_prob_h <- ew_maxh(g)[["h"]]
 
-  # Get location, i.e. value of p, where the surface under the part
-  # of the chance graph from 0 to p equals cert.
-  max <- ew_maxcumh_p(g, cert)
+    # Get location, i.e. value of p, where the surface under the part
+    # of the chance graph from 0 to p equals cert.
+    max <- ew_maxcumh_p(g, cert)
 
-  # Get p and h vectors from g.
-  p <- ew_get_p(g)
-  h <- ew_get_h(g)
+    # Get p and h vectors from g.
+    p <- ew_get_p(g)
+    h <- ew_get_h(g)
 
-  # Make a vector with one (arbitrary) categorical value for colouring.
-  # To be used below for colouring the chance graph.
-  colouring <- rep("a", times = length(p))
+    # Make a vector with one (arbitrary) categorical value for colouring.
+    # To be used below for colouring the chance graph.
+    colouring <- rep("a", times = length(p))
 
-  # Place p, h, and colouring in one tibble.
-  t <- tibble(p, h, colouring)
+    # Place p, h, and colouring in one tibble.
+    t <- tibble(colouring, p, h)
 
-  # Keep only higher chance parts.
-  t <- t %>% filter(h >= min_prob)
+    # Keep only higher chance parts.
+    t_high <- t %>% filter(h >= min_prob)
 
-  # Count data rows for the plot.
-  data_rows_available <- nrow(t)
+    # Count data rows for the plot.
+    data_rows_available <- nrow(t_high)
 
-  # Make long version of t for plotting.
-  cols <- "h"
-
-  # Construct title.
-  title <- sprintf("%d draws needed; projected chance graph", n)
-
-  # Construct subtitle.
-  {
-    line <- "input:\n"
-    lines <- line
-
-    line <- sprintf(
-      "     expected_error_rate = %s (blue dotted line); allowed_error_rate = %s (red dotted line); cert = %s;\n",
-      formatf_without_trailing_zeros(expected_error_rate),
-      formatf_without_trailing_zeros(allowed_error_rate),
-      formatf_without_trailing_zeros(cert)
-    )
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- sprintf(
-      "     max_n = %d; S = %d, min_prob = %s\n",
-      max_n,
-      S,
-      formatf_without_trailing_zeros(min_prob)
-    )
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- "output:\n"
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- sprintf("     n = estimated number of draws needed = %d\n", n)
-    lines <- sprintf("%s%s", lines, line)
-
-    line <- sprintf(
-      "     k = estimate of errors that will be found = n * expected_error_rate = %s\n",
-      formatf_without_trailing_zeros(expected_error_rate * n)
-    )
-    lines <- sprintf("%s%s", lines, line)
-
-    # line <- sprintf("     black dots: postulated error fraction versus probability, given n and k\n")
-    # lines <- sprintf("%s%s", lines, line)
-
+    # If 0 data rows, adapt min_prob.
+    # And filter again.
+    min_prob_adapted <- -1
     if (data_rows_available == 0) {
-      line <- sprintf(
-        "     NO DATA POINTS SHOWN AS min_prob IS TOO HIGH; PLEASE MAKE min_prob <= %d\n",
-        floor(most_prob_h)
-      )
-      lines <- sprintf("%s%s", lines, line)
+
+       # Find p position of posited_defect_rate.
+       i_pdr <- which.min(abs(p - posited_defect_rate))
+
+       # Find p position of allowed_defect_rate.
+       i_adr <- which.min(abs(p - allowed_defect_rate))
+
+       # Find h for posited_defect_rate.
+       h_pdr <- h[[i_pdr]]
+
+       # Find h for allowed_defect_rate.
+       h_adr <- h[[i_adr]]
+
+
+       # Assign min_prob_adapted.
+       min_prob_adapted <- min(h_pdr, h_adr) / 2
+
+      # Reassign t_high and data_rows_available
+      t_high <- t %>% filter(h >= min_prob_adapted)
+      data_rows_available <- nrow(t_high)
     }
 
-    subtitle <- lines
+    stopifnot(data_rows_available > 0)
+
+    # Construct title.
+    title <- sprintf("%d draws needed; projected chance graph", n)
+
+    # Construct subtitle.
+    {
+      line <- "input:\n"
+      lines <- line
+
+      line <- sprintf(
+        "     posited_defect_rate = %s; allowed_defect_rate = %s; cert = %s;\n",
+        formatf_without_trailing_zeros(posited_defect_rate),
+        formatf_without_trailing_zeros(allowed_defect_rate),
+        formatf_without_trailing_zeros(cert)
+      )
+      lines <- sprintf("%s%s", lines, line)
+
+      line <- sprintf("     S = %d, min_prob = %s\n",
+                      S,
+                      formatf_without_trailing_zeros(min_prob))
+      lines <- sprintf("%s%s", lines, line)
+
+      line <- "output:\n"
+      lines <- sprintf("%s%s", lines, line)
+
+      line <- sprintf("     n = estimated number of draws needed = %d\n", n)
+      lines <- sprintf("%s%s", lines, line)
+
+      line <- sprintf(
+        "     k = estimate of defects that will be found = n * posited_defect_rate = %s\n",
+        formatf_without_trailing_zeros(posited_defect_rate * n)
+      )
+      lines <- sprintf("%s%s", lines, line)
+
+      if (min_prob_adapted > -1) {
+        line <- sprintf(
+          "     NOTE: min_prob was too low; adapted to %f\n",
+          min_prob_adapted
+        )
+        lines <- sprintf("%s%s", lines, line)
+      }
+
+      subtitle <- lines
+    }
+
+    # Prepare vertical lines for max values.
+    vline_posited_defect_rate <-
+      geom_vline(
+        mapping = NULL,
+        data = NULL,
+        xintercept = posited_defect_rate,
+        colour = "blue",
+        linetype = "dotted"
+      )
+    vline_allowed_defect_rate <-
+      geom_vline(
+        mapping = NULL,
+        data = NULL,
+        xintercept = allowed_defect_rate,
+        colour = "red",
+        linetype = "dotted"
+      )
+
+      # Subset for area shading to the left of the allowed_defect_rate
+      t_shade <- t_high %>% filter(p <= allowed_defect_rate)
+
+    # Call ggplot() on prepared data, title, subtitle.
+    result <- ggplot(data = t_high, aes(x = p, y = h)) +
+      vline_posited_defect_rate +
+      vline_allowed_defect_rate +
+      theme(plot.subtitle = element_text(size = 9, color = "blue")) +
+      geom_area(
+        data = t_shade,
+        aes(x = p, y = h),
+        fill = rgb(0.78, 0.89, 1, alpha = 0.6),
+        color = "blue"
+      ) +
+      annotate(
+        "text",
+        x = posited_defect_rate + (allowed_defect_rate - posited_defect_rate) * .2,
+        y = most_prob_h * 0.2,
+        label = "area == cert",
+        size = 4.5,
+        color = "blue",
+        hjust = 0
+      ) +
+      annotate(
+        "text",
+        x = posited_defect_rate,
+        y = most_prob_h * 0.15,
+        label = "posited defect rate",
+        angle = 90,
+        # Rotate text vertically, and up.
+        vjust = 0,
+        hjust = 0,
+        size = 3.5,
+        color = "blue"
+      ) +
+      annotate(
+        "text",
+        x = allowed_defect_rate,
+        y = most_prob_h * 0.85,
+        label = "allowed defect rate",
+        angle = 270,
+        # Rotate text vertically, and down.
+        vjust = 0,
+        hjust = 0,
+        size = 3.5,
+        color = "red"
+      ) +
+      geom_point(color = "blue") +
+      scale_colour_manual(
+        values = c("blue", "orange"),
+        guide = "none" #,
+        # breaks = c(possible) #,
+        # labels = c(possible)
+      ) +
+      labs(
+        title = title,
+        subtitle = subtitle,
+        # caption = " ",
+        x = "postulated defect rate",
+        y = "probability"#,
+        # color = "what"
+      )
+
+    return(result)
+  } else
+    # No solution found. Explain what could be done.
+  {
+    g <- ew_from_vec(rep.int(1, 1000))
+
+    # Get p and h vectors from g.
+    p <- ew_get_p(g)
+    h <- ew_get_h(g)
+
+    # Place p and h in one tibble.
+    t <- tibble(p, h)
+
+    # Construct title.
+    title <- sprintf("no solution")
+
+    # Construct subtitle.
+    {
+      line <- "input:\n"
+      lines <- line
+
+      line <- sprintf(
+        "     posited_defect_rate = %s; allowed_defect_rate = %s; cert = %s;\n",
+        formatf_without_trailing_zeros(posited_defect_rate),
+        formatf_without_trailing_zeros(allowed_defect_rate),
+        formatf_without_trailing_zeros(cert)
+      )
+      lines <- sprintf("%s%s", lines, line)
+
+      line <- sprintf("     S = %d, min_prob = %s\n",
+                      S,
+                      formatf_without_trailing_zeros(min_prob))
+      lines <- sprintf("%s%s", lines, line)
+
+      subtitle <- lines
+    }
+
+    # Call ggplot() on prepared data, title, subtitle.
+    result <- ggplot(data = t, aes(x = p, y = h)) +
+      theme(plot.subtitle = element_text(size = 9, color = "blue")) +
+      annotate(
+        "text",
+        x = allowed_defect_rate,
+        y = max(t$h) * 0.85,
+        label = "remedies:",
+        angle = 0,
+        vjust = 0,
+        hjust = 0,
+        size = 5,
+        color = "black"
+      ) +
+      annotate(
+        "text",
+        x = 0.1,
+        y = max(t$h) * 0.65,
+        label = "posited_defect_rate: make it smaller",
+        angle = 0,
+        vjust = 0,
+        hjust = 0,
+        size = 5.5,
+        color = "green"
+      ) +
+      annotate(
+        "text",
+        x = 0.1,
+        y = max(t$h) * 0.55,
+        label = "allowed_defect_rate: make it larger",
+        angle = 0,
+        vjust = 0,
+        hjust = 0,
+        size = 5.5,
+        color = "green"
+      ) +
+      annotate(
+        "text",
+        x = 0.1,
+        y = max(t$h) * 0.45,
+        label = "cert: make it smaller",
+        angle = 0,
+        vjust = 0,
+        hjust = 0,
+        size = 5.5,
+        color = "green"
+      ) +
+      geom_point(color = "yellow") +
+      labs(
+        title = title,
+        subtitle = subtitle,
+        # caption = " ",
+        x = "postulated defect rate",
+        y = "probability"#,
+        # color = "what"
+      )
+
+    return(result)
   }
-
-  # Prepare vertical lines for max values.
-  vline_expected_error_rate <-
-    geom_vline(
-      mapping = NULL,
-      data = NULL,
-      xintercept = expected_error_rate,
-      colour = "blue",
-      linetype = "dotted"
-    )
-  vline_allowed_error_rate <-
-    geom_vline(
-      mapping = NULL,
-      data = NULL,
-      xintercept = allowed_error_rate,
-      colour = "red",
-      linetype = "dotted"
-    )
-
-  # Call ggplot() on prepared data, title, subtitle.
-  result <- ggplot(data = t) +
-    vline_expected_error_rate +
-    vline_allowed_error_rate +
-    theme(plot.subtitle = element_text(size = 9, color = "blue")) +
-    geom_point(mapping = aes(x = p, y = h, color = colouring)) +
-    scale_colour_manual(
-      values = c("blue"),
-      guide = "none" #,
-      # breaks = c(possible) #,
-      # labels = c(possible)
-    ) +
-    labs(
-      title = title,
-      subtitle = subtitle,
-      # caption = " ",
-      x = "postulated error fraction",
-      y = "probability"#,
-      # color = "what"
-    )
-
-  return(result)
 }
