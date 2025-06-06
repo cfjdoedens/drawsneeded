@@ -92,76 +92,60 @@ drawsneeded_plot <- function(posited_defect_rate,
     t <- tibble(colouring, p, h)
 
     # Keep only higher chance parts.
-    t_high <- t %>% filter(h >= min_prob)
+    t <- t %>% filter(h >= min_prob)
 
     # Count data rows for the plot.
-    data_rows_available <- nrow(t_high)
+    data_rows_available <- nrow(t)
 
-    # If 0 data rows, adapt min_prob.
-    # And filter again.
-    min_prob_adapted <- -1
-    if (data_rows_available == 0) {
-
-       # Find p position of posited_defect_rate.
-       i_pdr <- which.min(abs(p - posited_defect_rate))
-
-       # Find p position of allowed_defect_rate.
-       i_adr <- which.min(abs(p - allowed_defect_rate))
-
-       # Find h for posited_defect_rate.
-       h_pdr <- h[[i_pdr]]
-
-       # Find h for allowed_defect_rate.
-       h_adr <- h[[i_adr]]
-
-
-       # Assign min_prob_adapted.
-       min_prob_adapted <- min(h_pdr, h_adr) / 2
-
-      # Reassign t_high and data_rows_available
-      t_high <- t %>% filter(h >= min_prob_adapted)
-      data_rows_available <- nrow(t_high)
+    # Find left and right x-values of higher chance parts.
+    x_high_left <- NA
+    x_high_right <- NA
+    if (data_rows_available > 0) {
+      x_high_left <- min(t$p)
+      x_high_right <- max(t$p)
     }
 
-    stopifnot(data_rows_available > 0)
-
     # Construct title.
-    title <- sprintf("%d draws needed; projected chance graph", n)
+    title <- sprintf("chance graph of postulated defect rate for n = %d, and k = %s",
+                       n, formatf_without_trailing_zeros(n*posited_defect_rate))
 
     # Construct subtitle.
     {
-      line <- "input:\n"
+      line <- "in:   "
       lines <- line
 
       line <- sprintf(
-        "     posited_defect_rate = %s; allowed_defect_rate = %s; cert = %s;\n",
+        "posited_defect_rate = %s; allowed_defect_rate = %s; cert = %s;",
         formatf_without_trailing_zeros(posited_defect_rate),
         formatf_without_trailing_zeros(allowed_defect_rate),
         formatf_without_trailing_zeros(cert)
       )
       lines <- sprintf("%s%s", lines, line)
 
-      line <- sprintf("     S = %d, min_prob = %s\n",
+      line <- sprintf(" S = %d, min_prob = %s\n",
                       S,
                       formatf_without_trailing_zeros(min_prob))
       lines <- sprintf("%s%s", lines, line)
 
-      line <- "output:\n"
+      line <- "out: "
       lines <- sprintf("%s%s", lines, line)
 
-      line <- sprintf("     n = estimated number of draws needed = %d\n", n)
+      line <- sprintf("n = estimated draws needed = %d;", n)
       lines <- sprintf("%s%s", lines, line)
 
       line <- sprintf(
-        "     k = estimate of defects that will be found = n * posited_defect_rate = %s\n",
+        " k = estimated defects = n * posited_defect_rate = %s",
         formatf_without_trailing_zeros(posited_defect_rate * n)
       )
       lines <- sprintf("%s%s", lines, line)
 
-      if (min_prob_adapted > -1) {
+      # line <- sprintf("     black dots: postulated defect fraction versus probability, given n and k\n")
+      # lines <- sprintf("%s%s", lines, line)
+
+      if (data_rows_available == 0) {
         line <- sprintf(
-          "     NOTE: min_prob was too low; adapted to %f\n",
-          min_prob_adapted
+          "     NO DATA POINTS SHOWN AS min_prob IS TOO HIGH; PLEASE MAKE min_prob <= %d\n",
+          floor(most_prob_h)
         )
         lines <- sprintf("%s%s", lines, line)
       }
@@ -187,11 +171,11 @@ drawsneeded_plot <- function(posited_defect_rate,
         linetype = "dotted"
       )
 
-      # Subset for area shading to the left of the allowed_defect_rate
-      t_shade <- t_high %>% filter(p <= allowed_defect_rate)
+    # Subset for area shading to the left of the allowed_defect_rate
+    t_shade <- t %>% filter(p <= allowed_defect_rate)
 
     # Call ggplot() on prepared data, title, subtitle.
-    result <- ggplot(data = t_high, aes(x = p, y = h)) +
+    result <- ggplot(data = t, aes(x = p, y = h)) +
       vline_posited_defect_rate +
       vline_allowed_defect_rate +
       theme(plot.subtitle = element_text(size = 9, color = "blue")) +
@@ -244,11 +228,13 @@ drawsneeded_plot <- function(posited_defect_rate,
       labs(
         title = title,
         subtitle = subtitle,
-        # caption = " ",
         x = "postulated defect rate",
         y = "probability"#,
         # color = "what"
-      )
+      ) +
+      theme(axis.title.x = element_text(colour = "black"),
+            axis.title.y = element_text(colour = "blue")) +
+      theme(plot.title = element_text(size = 14, color = "blue")) #, face = "bold"))
 
     return(result)
   } else
@@ -268,7 +254,7 @@ drawsneeded_plot <- function(posited_defect_rate,
 
     # Construct subtitle.
     {
-      line <- "input:\n"
+      line <- "in:\n"
       lines <- line
 
       line <- sprintf(

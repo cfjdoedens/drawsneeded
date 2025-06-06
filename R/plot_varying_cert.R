@@ -15,7 +15,7 @@
 #'     plot.
 #'
 #' @examples
-#'   margin_plot_varying_cert(posited_defect_rate = 0.01, allowed_defect_rate = 0.02)
+#'   plot_varying_cert(posited_defect_rate = 0.01, allowed_defect_rate = 0.02)
 #' @returns
 #'   A ggplot.
 #' @importFrom ewgraph partition
@@ -23,7 +23,7 @@
 #' @import ggplot2
 #' @importFrom tibble tibble
 #' @export
-margin_plot_varying_cert <- function(posited_defect_rate = 0.01,
+plot_varying_cert <- function(posited_defect_rate = 0.01,
                                      allowed_defect_rate = 0.02,
                                      max_n = 1000,
                                      S = 10000) {
@@ -33,7 +33,7 @@ margin_plot_varying_cert <- function(posited_defect_rate = 0.01,
     stopifnot(length(posited_defect_rate) == 1)
     stopifnot(length(allowed_defect_rate) == 1)
 
-    # check of specific arguments to margin_plot_varying_cert().
+    # check of specific arguments to plot_varying_cert().
     stopifnot(length(S) == 1)
     stopifnot(posint(S))
 
@@ -74,14 +74,13 @@ margin_plot_varying_cert <- function(posited_defect_rate = 0.01,
   cert_highest_n <- cert[[which.max(draws_needed)]]
 
   # Construct title.
-  title <- sprintf("varying certainty between 0.5 and 1, shown up to %d draws",
-                   max_n)
+  title <- sprintf("certainty from 0.5 to 1")
 
   # Construct subtitle.
   {
     lines <- ""
     line <- sprintf(
-      "     in: posited_defect_rate = %s; allowed_defect_rate = %s; S = %d\n",
+      "in:   posited_defect_rate = %s; allowed_defect_rate = %s; S = %d\n",
       formatf_without_trailing_zeros(posited_defect_rate),
       formatf_without_trailing_zeros(allowed_defect_rate),
       S
@@ -89,51 +88,59 @@ margin_plot_varying_cert <- function(posited_defect_rate = 0.01,
     lines <- sprintf("%s%s", lines, line)
 
     line <- sprintf(
-      "     out: highest number of draws = %d; reached for certainty = %s",
+      "out: highest number of draws = %d, at certainty = %s; shown up to %d draws",
       highest_n,
-      formatf_without_trailing_zeros(cert_highest_n)
+      formatf_without_trailing_zeros(cert_highest_n),
+      max_n
     )
     lines <- sprintf("%s%s", lines, line)
 
     subtitle <- lines
   }
 
-  # Prepare vertical lines for max values.
-  {
-    hline_cert_highest_n <-
-      geom_hline(
-        mapping = NULL,
-        data = NULL,
-        yintercept = max_n,
-        colour = "green",
-        linetype = "dotted"
-      )
+  # Prepare ceiling line for # draws.
+  hline_cert_highest_n <-
+    geom_hline(
+      mapping = NULL,
+      data = NULL,
+      yintercept = max_n,
+      colour = "green",
+      linetype = "dotted"
+    )
 
-    # Call ggplot() on prepared data, title, subtitle.
-    result <-
-      ggplot(data = t) +
-      hline_cert_highest_n +
-      theme(plot.subtitle = element_text(size = 9, color = "blue")) +
-      geom_point(mapping = aes(x = cert, y = draws_needed, color = possible)) +
-      scale_colour_manual(values = c(`TRUE` = "blue", `FALSE` = "transparent", "blue"), guide = "none") +
-      annotate(
-        "text",
-        x = 0.2,
-        y = max_n,
-        label = "ceiling for # draws",
-        angle = 0,
-        vjust = 0,
-        hjust = 0,
-        size = 3.5,
-        color = "green"
-      ) +
-      labs(
-        title = title,
-        subtitle = subtitle,
-        x = "cert",
-        y = "draws needed"#,
-      )
+  # Call ggplot() on prepared data, title, subtitle.
+  result <-
+    ggplot(data = t) +
+    hline_cert_highest_n +
+    theme(plot.subtitle = element_text(size = 9, color = "blue")) +
+    geom_point(mapping = aes(x = cert, y = draws_needed, color = possible)) +
+    scale_colour_manual(
+      values = c(`TRUE` = "brown", `FALSE` = "transparent", "blue"),
+      guide = "none"
+    ) +
+    annotate(
+      "text",
+      x = 0.2,
+      y = max_n,
+      label = "ceiling for # draws",
+      angle = 0,
+      vjust = 0,
+      hjust = 0,
+      size = 3.5,
+      color = "green"
+    ) +
+    labs(
+      title = title,
+      subtitle = subtitle,
+      x = "certainty",
+      y = "draws needed"#,
+    ) +
+    theme(axis.title.x = element_text(colour = "black"),
+          axis.title.y = element_text(colour = "brown")) +
+    theme(plot.title = element_text(size = 14, color = "brown")) #, face = "bold"))
 
-    return(result)
-  }
+
+
+  return(result)
+
 }

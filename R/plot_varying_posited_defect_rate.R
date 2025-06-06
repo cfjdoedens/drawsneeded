@@ -13,7 +13,7 @@
 #'     plot.
 #'
 #' @examples
-#'   margin_plot_varying_posited_defect_rate(allowed_defect_rate = 0.02, cert = 0.95)
+#'   plot_varying_posited_defect_rate(allowed_defect_rate = 0.02, cert = 0.95)
 #' @returns
 #'   A ggplot.
 #' @importFrom ewgraph partition
@@ -21,7 +21,7 @@
 #' @import ggplot2
 #' @importFrom tibble tibble
 #' @export
-margin_plot_varying_posited_defect_rate <- function(allowed_defect_rate,
+plot_varying_posited_defect_rate <- function(allowed_defect_rate,
                                                     cert = 0.95,
                                                     max_n = 1000,
                                                     S = 10000) {
@@ -31,7 +31,7 @@ margin_plot_varying_posited_defect_rate <- function(allowed_defect_rate,
     stopifnot(length(allowed_defect_rate) == 1)
     stopifnot(length(cert) == 1)
 
-    # Check of specific arguments to margin_plot_varying_posited_defect_rate().
+    # Check of specific arguments to plot_varying_posited_defect_rate().
     stopifnot(length(max_n) == 1)
     stopifnot(posint(max_n))
     stopifnot(length(S) == 1)
@@ -71,16 +71,14 @@ margin_plot_varying_posited_defect_rate <- function(allowed_defect_rate,
 
   # Construct title.
   title <- sprintf(
-    "varying posited defect rate between 0 and allowed defect rate (%s),\nshown up to %d draws",
-    formatf_without_trailing_zeros(allowed_defect_rate),
-    max_n
-  )
+    "posited defect rate from 0 to allowed defect rate (%s)",
+    formatf_without_trailing_zeros(allowed_defect_rate))
 
   # Construct subtitle.
   {
     lines <- ""
     line <- sprintf(
-      "     in: allowed_defect_rate = %s; cert = %s; S = %d\n",
+      "in:   allowed_defect_rate = %s; cert = %s; S = %d\n",
       formatf_without_trailing_zeros(allowed_defect_rate),
       formatf_without_trailing_zeros(cert),
       S
@@ -88,9 +86,10 @@ margin_plot_varying_posited_defect_rate <- function(allowed_defect_rate,
     lines <- sprintf("%s%s", lines, line)
 
     line <- sprintf(
-      "     out: highest number of draws = %d; reached for posited defect rate = %s\n",
+      "out: highest number of draws = %d, at posited defect rate = %s; shown up to %d draws\n",
       highest_n,
-      formatf_without_trailing_zeros(er_highest_n)
+      formatf_without_trailing_zeros(er_highest_n),
+      max_n
     )
     lines <- sprintf("%s%s", lines, line)
 
@@ -126,7 +125,7 @@ margin_plot_varying_posited_defect_rate <- function(allowed_defect_rate,
     vline_allowed_defect_rate +
     theme(plot.subtitle = element_text(size = 9, color = "blue")) +
     geom_point(mapping = aes(x = posited_defect_rate, y = draws_needed, color = possible)) +
-    scale_colour_manual(values = c("transparent", "blue"), guide = "none") +
+    scale_colour_manual(values = c("transparent", "brown"), guide = "none") +
     annotate(
       "text",
       x = 0.2*allowed_defect_rate,
@@ -156,7 +155,10 @@ margin_plot_varying_posited_defect_rate <- function(allowed_defect_rate,
       # caption = "piep",
       x = "posited defect rate",
       y = "draws needed"#,
-    )
+    ) +
+    theme(axis.title.x = element_text(colour = "black"),
+          axis.title.y = element_text(colour = "brown")) +
+    theme(plot.title = element_text(size = 14, color = "brown")) #, face = "bold"))
 
   return(result)
 }

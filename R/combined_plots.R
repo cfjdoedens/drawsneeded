@@ -57,19 +57,19 @@ combined_plots <- function(posited_defect_rate,
     S = S,
     min_prob = min_prob
   )
-  plot2 <- margin_plot_varying_posited_defect_rate(
+  plot2 <- plot_varying_posited_defect_rate(
     allowed_defect_rate = allowed_defect_rate,
     cert = cert,
     max_n = max_n,
     S = S
   )
-  plot3 <- margin_plot_varying_allowed_defect_rate(
+  plot3 <- plot_varying_allowed_defect_rate(
     posited_defect_rate = posited_defect_rate,
     cert = cert,
     max_n = max_n,
     S = S
   )
-  plot4 <- margin_plot_varying_cert(
+  plot4 <- plot_varying_cert(
     posited_defect_rate = posited_defect_rate,
     allowed_defect_rate = allowed_defect_rate,
     max_n = max_n,

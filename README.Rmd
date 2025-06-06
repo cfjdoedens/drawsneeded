@@ -1,7 +1,7 @@
 ---
 output: github_document
-editor_options: 
-  markdown: 
+editor_options:
+  markdown:
     wrap: 72
 ---
 
@@ -15,12 +15,32 @@ coverage](https://codecov.io/gh/cfjdoedens/drawsneeded/graph/badge.svg)](https:/
 
 <!-- badges: end -->
 
-```{r init, message=TRUE, warning=TRUE, include=FALSE, paged.print=TRUE}
+```{r setup, include=FALSE}
+# This chunk is to aid during programming of the drawsneeded package
+# and creating its README.Rmd.
+# The chunk makes
+# the local, version of the 'drawsneeded' package available for
+# subsequent chunks.
+
+# Check if devtools is available AND if the current directory is the package root
+# by checking for the project file.
+if (requireNamespace("devtools", quietly = TRUE) &&
+    file.exists("drawsneeded.Rproj")) {
+  devtools::load_all(".")
+} else {
+  # Fallback: Load the installed version of the package
+  # This is for environments where the package is installed (e.g., CI, or after devtools::install())
+  library(drawsneeded)
+}
+
+# Set global knitr options for all subsequent chunks
 knitr::opts_chunk$set(
-collapse = TRUE,
-comment = "#>",
-fig.path = "man/figures/README-",
-out.width = "100%"
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  message = FALSE, # Suppress messages (like package loading messages)
+  warning = FALSE  # Suppress warnings
 )
 ```
 
@@ -28,97 +48,98 @@ out.width = "100%"
 
 ## Introduction
 
-Supports planning of statistical sampling to audit the defect rate in a set of like items.
-This package is useful, when the purpose of the audit is to establish whether the 
-defect rate of the total set with e.g. .95 certainty is below a threshold, 
-the maximally allowed defect rate.
-drawsneeded() assumes the defect rate of an individual item is expressed 
-on a scale of 0 tot 1. 
+drawsneeded is an R package for use in auditing based on statistical sampling. It helps choose the sample size. This is based on the required level of certainty and the maximum allowed defect rate.
 
-An example application is the audit of a file of monetary statements.
-In general this concerns money that has
-been spent. Here the defect rate is the fraction of money from the file
-that was wrongly spent. And the defect rate of an individual element 
-typically varies from 0 to 1, with probably most elements having 0 defect
-rate and some elements having substantial defect rates.
+To make this more explicit, drawsneeded is useful when:
+1. you want to audit the defect rate of a set of like items, and
+1. you consider doing this audit by means of statistical sampling
+   on the set of items, and
+1. you want to establish whether or not the defect rate is
+   below a certain threshold, and
+1. you want to estimate how many items (draws) you need to sample, i.e.
+   you want to estimate the needed sample size.
 
-Another example application is the audit of a file of administrative decisions
-that have to be checked on their legality.
-Here the defect rate is the fraction of decisions in the file 
-that are not legally correct.
-Typically the defect of an individual item is either 0 or 1.
+## Installation
 
-This package has the function 
+You can install the development version of drawsneeded from
+[GitHub](https://github.com/) with:
 
-* drawsneeded(posited_defect_rate, allowed_defect_rate, cert)
+```{r install, eval = FALSE, message=FALSE, warning=FALSE, echo=TRUE}
+  if (!requireNamespace("devtools", quietly = TRUE)) {
+    install.packages("devtools")
+  }
+  devtools::install_github("cfjdoedens/drawsneeded")
+```
 
-The function
+## Overview of functions
+
+* drawsneeded() – Estimate number of samples required.
+* drawsneeded_plot() – Visualize relationship between assumptions and sample
+  size.
+* plot_varying_*() – Examine sensitivity of required samples to different
+  parameters.
+* combined_plots() - Combine output of all plot functions in one picture.
+
+## Main function: drawsneeded()
+
+The function drawsneeded(posited_defect_rate, allowed_defect_rate, cert)
 gives an estimate of the number of drawn items needed to
-establish with some certainty, _cert_, that the defect rate is below a certain
+establish with some certainty level, _cert_, that the defect rate is below a
+certain
 threshold, _allowed_defect_rate_. The assumption of drawsneeded() is
-that each drawn item exactly hase _posited_defect_rate_. 
+that each drawn item exactly has _posited_defect_rate_.
 It might be that in practice the items have a defect
-of either 0 or 1, or, when they have a defect 
-on a scale from 0 to 1, most items have 0 defect and most items will contain no 
+of either 0 or 1, or, when they have a defect
+on a scale from 0 to 1, most items have 0 defect and most items will contain no
 defects at all, and some items
-will have a large defect rate, or are even totally defective.
-Still, we suppose that this assumption leaves the estimates
-of drawsneeded() realistic.
+will have a large defect, or are even totally defective.
+So, in practice the defect rate may have greater variance, but this assumption
+preserves its expected value.
 
 Due to randomness, the actual number of
-needed drawn items might be smaller or bigger. 
-Also, it might turn out, that the set has a higher defect rate than 
+needed drawn items might be smaller or bigger.
+Also, it might turn out, that the set has a higher defect rate than
 allowed_defect_rate. In that case no amount of draws will suffice
 to prove that the defect rate is below allowed_defect_rate.
 
-The package has a couple of plotting functions:
+## Statistical model
 
-* drawsneeded_plot()
-* margin_plot_varying_posited_defect_rate()
-* margin_plot_varying_allowed_defect_rate()
-* margin_plot_varying_cert()
-* combined_plot()
+drawsneeded can be used in audits of financial records or administrative decisions, where the defect rate might be binary (0 or 1) or continuous (ranging from 0 to 1).
 
-These should give the user insight in the relation between number
-of draws taken and resulting estimates about the defect rate in the
-set of items that is audited. 
+For example:
 
-## When can drawsneeded() be useful?
-
-drawsneeded() can be useful in the following situation:
-
-1. you want to audit the defect rate of a set of like items, and
-1. you consider doing this audit by means of statistical sampling 
-   on the set of items, and
-1. you want to establish whether or not the defect rate is
-   below a certain treshold, and
-1. you want to estimate how many items you need to sample
-
-## Role of posited_defect_rate
-
-As said, the function drawsneeded(posited_defect_rate, allowed_defect_rate, cert)
+* In a financial audit, the overall defect rate might be the proportion of funds spent improperly.
+* In an administrative audit, the overall defect rate might be the proportion of decisions that violate policy.
+  
+The function
+drawsneeded(posited_defect_rate, allowed_defect_rate, cert)
 gives an estimate of the minimum number of drawn items needed to
 establish with some certainty, cert, e.g. 0.95, that the defect rate is below allowed_defect_rate.
 For this estimation it assumes that the actual defect rate in the file
-of items equals the posited_defect_rate. 
+of items equals the posited_defect_rate.
 It is up to the user of drawsneeded() to choose a
 posited_defect_rate().
 When the posited_defect_rate is chosen conservative, i.e.
 on the high side, it can be used with some confidence to produce a not too
 low number. And vice versa we can set the posited_defect_rate on the low side
-to get a bottom estimate of the number of monetary statements that need 
+to get a bottom estimate of the number of items that need
 to be drawn and checked.
 
-The function assumes that each drawn item has a defect rate of posited_defect_rate.
-And it computes the minimum number of drawn items necessary to establish with cert certainty
+drawsneeded() assumes that each item that will be drawn has a defect of
+posited_defect_rate.
+And it computes the minimum number of drawn items necessary to establish with
+cert certainty
 that posited_defect_rate < allowed_defect_rate. Note that it might actually not
-be possible for any of the items in the file to have exactly 
-that defect rate.
+be possible for any of the items in the file to have exactly
+that defect size.
 
-The computation of this minimum is based on the binomial distribution. This is extended
+The computation of this minimum is based on the binomial distribution.
+This is extended
 with the beta distribution to allow for non integer values of defects.
-(The binomial distribution assumes that there are very many items to draw from, which
-all have equal chance of being drawn, and there are so many items that when we have drawn some
+(The binomial distribution assumes that there are very many items to draw from,
+which
+all have equal chance of being drawn, and there are so many items that when we
+have drawn some
 this does not change in a substantial way the rate of erroneous items.)
 
 Note that in this scheme the statistical procedure that is used to estimate
@@ -128,18 +149,12 @@ to estimate the minimal number of items that need to be drawn to estimate
 the defect rate with sufficient certainty.
 The posited_defect_rate is used only for planning.
 
-## Usage
+## Advanced use
 
-### General
-
-Using drawsneeded() is a simple and cheap way to estimate
-the effort, needed to statistically establish the 
-defect rate in a set of like items. 
-
-### No need to stick to the planning for actual drawing and checking
+### Planning versus execution
 
 The number that is produced by drawsneeded() gives an estimate of
-how many drawn items are needed to establish the defect rate in a set of 
+how many drawn items are needed to establish the defect rate in a set of
 like items. In order to have a statistical sound
 estimate of the defect rate, it is not necessary to stick to that planned number
 for actual drawing and evaluation!
@@ -148,15 +163,16 @@ The number is just an indication of the effort needed.
 For example, when drawsneeded() estimates that there are 365
 draws needed (see the first example below), it might
 turn out that after 298 draws checked, not one defect was
-found. If the 298 items were chosen randomly, 
+found. If the 298 items were chosen randomly,
 over the total
 set of items, it can be safely concluded that the defect rate is not
 more than 1 %. And there is no need to check the other 67 items.
 
 On the other hand, when it turns out that the defect rate of the
 drawn and evaluated so far items is above the posited_defect_rate,
-one can do a new call on drawsneeded() to establish a new, and 
-forcibly higher, number of draws that are needed. Care should be taken that all
+one can do a new call on drawsneeded() to establish a new, and
+forcibly higher, number of draws that are needed. Care should be taken
+then that all
 items in the file had, and have, an equal chance of being selected.
 
 ### Combination with incremental drawing
@@ -167,28 +183,10 @@ i.e. low, guess of the posited_defect_rate, and once this indeed turns
 out to be too optimistic, plan anew as described above with
 the actual defect rate found in the already checked items.
 
-## Installation
+## Examples
+### 0.1 percent defect expected
 
-You can install the development version of drawsneeded from
-[GitHub](https://github.com/) with:
-
-```{r install, message=TRUE, warning=TRUE, echo=TRUE}
-if (file.exists("/home/crist-jan/R/x86_64-pc-linux-gnu-library/4.5/drawsneeded")) {
-  # We are executing on the author machine, use the development version available there.
-  library("drawsneeded")
-  print("using files directly from author of package; not from github")
-} else {
-  # Use the github version.
-  if (!requireNamespace("pak", quietly = TRUE)) {
-    install.packages("pak")
-  }
-  pak::pak("cfjdoedens/drawsneeded")
-  print("using files from github")
-}
-```
-## Example: 0.1 percent defect expected
-
-### posited_defect_rate = *0.001*, allowed_defect_rate = 0.01, cert = 0.95
+#### posited_defect_rate = *0.001*, allowed_defect_rate = 0.01, cert = 0.95
 
 Suppose you know from previous experience that a small defect rate might
 exist in the set of items. You guess the defect rate to
@@ -197,7 +195,8 @@ posited_defect_rate to 0.001. You need a result with 95% certainty. So
 you set certainty to 0.95.
 
 ```{r tiny-defects-num}
-drawsneeded(posited_defect_rate = 0.001, allowed_defect_rate = 0.01, cert = 0.95)
+drawsneeded(posited_defect_rate = 0.001, allowed_defect_rate = 0.01,
+            cert = 0.95)
 ```
 
 The conclusion is that you will need at least 365 samples.
@@ -205,100 +204,141 @@ The conclusion is that you will need at least 365 samples.
 In a picture this looks like:
 
 ```{r tiny-defects-plot}
-drawsneeded_plot(posited_defect_rate = 0.001,  allowed_defect_rate = 0.01, cert = 0.95)
+drawsneeded_plot(posited_defect_rate = 0.001,  allowed_defect_rate = 0.01,                                      cert = 0.95)
 ```
-We can further analyse the situation by varying over posited_defect_rate, or over allowed_defect_rate or over cert.
+
+drawsneeded_plot() has called drawsneeded() to compute the number of items
+that should be in the sample. This number is 365. The plot then shows the
+chance graph, i.e. probability density function,
+of the postulated defect rate given there were n = 365 items
+drawn, and the sum of defects of these drawn items,
+k = n * posited_defect_rate = n * 0.01 = 365 * 0.01 = 3.65.
+
+We can further analyse the situation by varying over posited_defect_rate,
+or over allowed_defect_rate or over cert.
 See the following three plots.
 
-### Varying over the posited defect rate
+#### Varying over the posited defect rate
 
 First we vary over the posited defect rate:
 
 ```{r tiny-defects-vary-eer-plot}
-margin_plot_varying_posited_defect_rate(allowed_defect_rate = 0.01, cert = 0.95, max_n = 1000)
+plot_varying_posited_defect_rate(allowed_defect_rate = 0.01,
+                                        cert = 0.95, max_n = 1000)
 ```
 
 We see that as posited_defect_rate goes near to allowed_defect_rate, the
-number of draws needed rises. In this graph only the results up to 1000 draws are shown.
-This limit can be made higher, but this does not really give a more interesting picture:
+number of draws needed rises. In this graph only the results up to 1000 draws
+are shown.
+This limit can be made higher, thereby we zoom out to 100 times larger scale
+for the y-axis (the number of draws needed).
 
 
 ```{r tiny-defects-vary-eer-plot-100000}
-margin_plot_varying_posited_defect_rate(allowed_defect_rate = 0.01, cert = 0.95, max_n = 100000)
+plot_varying_posited_defect_rate(allowed_defect_rate = 0.01,
+                                        cert = 0.95, max_n = 100000)
 ```
+
+As we can see, when the posited_defect_rate comes more close to the
+allowed_defect_rate, the number of draws needed rises more sharply.
+Compare this graph with the previous graph: we see that, due to a 100 times
+bigger scale on the y-axis, the curve looks much flatter, for the part of the posited_defect_rate from 0 to 0.0050.
 
 We can also study the variation of posited_defect_rate in a non graphical way:
 
 ```{r tiny-defects-vary-eer-num}
-drawsneeded(posited_defect_rate = seq(from = 0.0, by = 0.001, to = 0.009), allowed_defect_rate = 0.01, cert = 0.95)
+drawsneeded(posited_defect_rate = seq(from = 0.0, by = 0.001, to = 0.009),
+            allowed_defect_rate = 0.01, cert = 0.95)
 ```
 
 Again we see that for a posited defect rate of 0.001, we need 365 draws.
+The advantage of the non graphical presentation is that we can more easily
+compare the different numerical values.
 
-### Varying over the allowed defect rate
+#### Varying over the allowed defect rate
 
 ```{r tiny-defects-vary-aer-plot}
-margin_plot_varying_allowed_defect_rate(posited_defect_rate = 0.001, cert = 0.95)
+plot_varying_allowed_defect_rate(posited_defect_rate = 0.001,
+                                        cert = 0.95)
 ```
 
 We see that as the
 allowed_defect_rate moves away from the posited_defect_rate, the number of
 draws falls sharply.
 
-Non graphically this looks like (note the 365 computed draws needed for allowed defect rate 0.01):
+Non graphically this looks like (note the 365 computed draws needed for
+allowed defect rate 0.01):
 
 ```{r tiny-defects-vary-aer-num1}
-drawsneeded(posited_defect_rate = 0.001, allowed_defect_rate = seq(from = 0.002, by = 0.001, to = 0.01), cert = 0.95)
+drawsneeded(posited_defect_rate = 0.001,
+            allowed_defect_rate = seq(from = 0.002, by = 0.001, to = 0.01),
+            cert = 0.95)
 ```
 
 and,
 
 ```{r tiny-defects-vary-aer-num2}
-drawsneeded(posited_defect_rate = 0.001, allowed_defect_rate = seq(from = 0.02, by = 0.01, to = 0.1), cert = 0.95)
+drawsneeded(posited_defect_rate = 0.001,
+            allowed_defect_rate = seq(from = 0.02, by = 0.01, to = 0.1),
+            cert = 0.95)
 ```
 and,
 ```{r tiny-defects-vary-aer-num3}
-drawsneeded(posited_defect_rate = 0.001, allowed_defect_rate = seq(from = 0.2, by = 0.1, to = 0.9), cert = 0.95)
+drawsneeded(posited_defect_rate = 0.001,
+            allowed_defect_rate = seq(from = 0.2, by = 0.1, to = 0.9),
+            cert = 0.95)
 ```
 
-### Varying over the certainty
+The non graphical presentation allows us to explore the variation of
+values more precisely, than just looking at the graph.
+
+#### Varying over the certainty
 
 Finally we can also vary over the certainty we apply.
 
 ```{r tiny-defects-vary-cert-plot}
-margin_plot_varying_cert(posited_defect_rate = 0.001, allowed_defect_rate = 0.01)
+plot_varying_cert(posited_defect_rate = 0.001,
+                         allowed_defect_rate = 0.01)
 ```
 
-As might be expected: if we can do with less certainty, then we need less draws.
+As might be expected: if we can do with less certainty, then we need fewer draws.
 
 In raw numbers this looks like:
 
 ```{r tiny-defects-vary-cert-num}
-drawsneeded(posited_defect_rate = 0.001, allowed_defect_rate = 0.01, cert = seq(from = 0.50, by = 0.05, to = 0.95))
+drawsneeded(posited_defect_rate = 0.001, allowed_defect_rate = 0.01,
+            cert = seq(from = 0.50, by = 0.05, to = 0.95))
 ```
 
 Note that for cert 0.95, we get again 365 draws needed.
 
-### All plots bundled in one picture
+#### All plots bundled in one picture
 
-We can call combined_plots() to get all four plots in one picture. However, it does not look
-very slick here due to lack of canvas space.
+We can call combined_plots() to get all four plots in one picture.
 
-```{r tiny-defects-all-plots}
-combined_plots(posited_defect_rate = 0.001, allowed_defect_rate = 0.01, cert = 0.95)
+```{r tiny-defects-all-plots, fig.width=14, fig.height=7}
+combined_plots(posited_defect_rate = 0.001, allowed_defect_rate = 0.01,
+               cert = 0.95)
 ```
 
+The blue graph shows the chance density for values from 0 to 1 of the 
+defect rate for the minimum combination of n and k
+given a _posited_ defect rate of 0.001, allowed defect rate of 0.01, and 
+certainty of 0.95. The brown graphs show what happens with the number of 
+draws needed when we vary
+posited defect rate, allowed defect rate and certainty.
 
+### No defect expected
 
-## Example: no defect expected
+#### posited_defect_rate = *0*, allowed_defect_rate = 0.01, cert = 0.95
 
-### posited_defect_rate = *0*, allowed_defect_rate = 0.01, cert = 0.95
-
-You might expect to see no defect at all in the to be audited set of items. Then you could
+You might expect to see no defect at all in the to be audited set of items.
+Then you could
 calculate as follows:
 
 ```{r zero-defects-num}
-drawsneeded(posited_defect_rate = 0, allowed_defect_rate = 0.01, cert = 0.95)
+drawsneeded(posited_defect_rate = 0, allowed_defect_rate = 0.01,
+            cert = 0.95)
 ```
 
 So then 298 samples is sufficient.
@@ -306,16 +346,19 @@ So then 298 samples is sufficient.
 In a picture this looks like:
 
 ```{r zero-defects-plot}
-drawsneeded_plot(posited_defect_rate = 0, allowed_defect_rate = 0.01, cert = 0.95)
+drawsneeded_plot(posited_defect_rate = 0, allowed_defect_rate = 0.01,
+                 cert = 0.95)
 ```
 
-Again, we can further analyse the situation by varying over posited_defect_rate, or over allowed_defect_rate or over cert. As we have above already studied varying the posited_defect_rate,
+Again, we can further analyse the situation by varying over
+posited_defect_rate, or over allowed_defect_rate or over cert.
+As we have above already studied varying the posited_defect_rate,
 we will not repeat that here.
 
-### Varying over the allowed defect rate
+#### Varying over the allowed defect rate
 
 ```{r zero-defects-vary-aer-plot}
-margin_plot_varying_allowed_defect_rate(posited_defect_rate = 0, cert = 0.95)
+plot_varying_allowed_defect_rate(posited_defect_rate = 0, cert = 0.95)
 ```
 
 We see that as the
@@ -325,25 +368,31 @@ draws falls sharply.
 Non graphically this looks like:
 
 ```{r zero-defects-vary-aer-num1}
-drawsneeded(posited_defect_rate = 0, allowed_defect_rate = seq(from = 0.001, by = 0.001, to = 0.01), cert = 0.95)
+drawsneeded(posited_defect_rate = 0,
+            allowed_defect_rate = seq(from = 0.001, by = 0.001, to = 0.01),
+            cert = 0.95)
 ```
 
 and,
 
 ```{r zero-defects-vary-aer-num2}
-drawsneeded(posited_defect_rate = 0, allowed_defect_rate = seq(from = 0.02, by = 0.01, to = 0.1), cert = 0.95)
+drawsneeded(posited_defect_rate = 0,
+            allowed_defect_rate = seq(from = 0.02, by = 0.01, to = 0.1),
+            cert = 0.95)
 ```
 and,
 ```{r zero-defects-vary-aer-num3}
-drawsneeded(posited_defect_rate = 0, allowed_defect_rate = seq(from = 0.2, by = 0.1, to = 0.9), cert = 0.95)
+drawsneeded(posited_defect_rate = 0,
+            allowed_defect_rate = seq(from = 0.2, by = 0.1, to = 0.9),
+            cert = 0.95)
 ```
 
-### Varying over the certainty
+#### Varying over the certainty
 
 Finally we can also vary over the certainty we apply.
 
 ```{r zero-defects-vary-cert-plot}
-margin_plot_varying_cert(posited_defect_rate = 0, allowed_defect_rate = 0.01)
+plot_varying_cert(posited_defect_rate = 0, allowed_defect_rate = 0.01)
 ```
 
 As might be expected: more certainty needs more draws.
@@ -351,31 +400,38 @@ As might be expected: more certainty needs more draws.
 In raw numbers this looks like:
 
 ```{r zero-defects-vary-cert-num}
-drawsneeded(posited_defect_rate = 0, allowed_defect_rate = 0.01, cert = seq(from = 0.50, by = 0.05, to = 0.95))
+drawsneeded(posited_defect_rate = 0, allowed_defect_rate = 0.01,
+            cert = seq(from = 0.50, by = 0.05, to = 0.95))
 ```
 
 We recognize the number 298 as the number of draws needed for cert 0.95.
 
-### All plots bundled in one picture
+#### All plots bundled in one picture
 
-We call combined_plots() to get all four plots in one picture. Again, it is does not look
-very nice here, because of the cramped space. 
+We call combined_plots() to get all four plots in one picture.
 
-```{r zero-defects-all-plots}
-combined_plots(posited_defect_rate = 0, allowed_defect_rate = 0.01, cert = 0.95)
+```{r zero-defects-all-plots,  fig.width=14, fig.height=7}
+combined_plots(posited_defect_rate = 0, allowed_defect_rate = 0.01,
+               cert = 0.95)
 ```
 
-
+The blue graph shows the chance density for values from 0 to 1 of the 
+defect rate for the minimum combination of n and k
+given a _posited_ defect rate of 0.0, allowed defect rate of 0.01, and 
+certainty of 0.95. The brown graphs show what happens with the number of 
+draws needed when we vary
+posited defect rate, allowed defect rate and certainty.
 
 ## Suggested extensions
 
--   Handle case where only integer values of k are possible. For example
-    when k \> 1 - cert, then round k up. Otherwise round k down.
--   In extension to the above:
-    Handle the case where per audited item only defect rates of fixed size are possible.
-    E.g. an item has as only possible defect rates: 0.25, 0.5, 0.75 and 1.0.
--   Add extra margin, so extra draws, by taking into account
-    the standard deviation.
 -   Add a prior to drawsneeded().
 -   Add a cost function that makes additional draws more expensive.
     The function can help with planning of incremental drawing.
+-   Add to this README an example table of draws needed 
+    based on variations of posited defect rate, allowed defect rate 
+    and certainty.
+-   Add a table function, that produces a table of draws needed
+    based on variations of posited defect rate, allowed defect rate 
+    and certainty.
+-   Make the functionality of this package into a live shiny app.
+

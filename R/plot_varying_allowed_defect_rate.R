@@ -13,7 +13,7 @@
 #'     plot.
 #'
 #' @examples
-#'   margin_plot_varying_allowed_defect_rate(posited_defect_rate = 0.01, cert = 0.95)
+#'   plot_varying_allowed_defect_rate(posited_defect_rate = 0.01, cert = 0.95)
 #' @returns
 #'   A ggplot.
 #' @importFrom ewgraph partition
@@ -21,7 +21,7 @@
 #' @import ggplot2
 #' @importFrom tibble tibble
 #' @export
-margin_plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
+plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
                                                    cert = 0.95,
                                                    max_n = 1000,
                                                    S = 10000) {
@@ -31,7 +31,7 @@ margin_plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
     stopifnot(length(posited_defect_rate) == 1)
     stopifnot(length(cert) == 1)
 
-    # check of specific arguments to margin_plot_varying_allowed_defect_rate().
+    # check of specific arguments to plot_varying_allowed_defect_rate().
     stopifnot(length(max_n) == 1)
     stopifnot(posint(max_n))
     stopifnot(length(S) == 1)
@@ -73,16 +73,15 @@ margin_plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
 
   # Construct title.
   title <- sprintf(
-    "varying allowed defect rate between posited defect rate (%s) and 1,\nshown up to %d draws",
-    formatf_without_trailing_zeros(posited_defect_rate),
-    max_n
+    "allowed defect rate from posited defect rate (%s) to 1",
+    formatf_without_trailing_zeros(posited_defect_rate)
   )
 
   # Construct subtitle.
   {
     lines <- ""
     line <- sprintf(
-      "     in: posited_defect_rate = %s (red dotted line); cert = %s; S = %d\n",
+      "in:   posited_defect_rate = %s (red dotted line); cert = %s; S = %d\n",
       formatf_without_trailing_zeros(posited_defect_rate),
       formatf_without_trailing_zeros(cert),
       S
@@ -90,14 +89,25 @@ margin_plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
     lines <- sprintf("%s%s", lines, line)
 
     line <- sprintf(
-      "     out: highest number of draws = %d; reached for allowed defect rate = %s (green line)\n",
+      "out: highest number of draws = %d, at allowed defect rate = %s (green line); shown up to %d draws",
       highest_n,
-      formatf_without_trailing_zeros(er_highest_n)
+      formatf_without_trailing_zeros(er_highest_n),
+      max_n
     )
     lines <- sprintf("%s%s", lines, line)
 
     subtitle <- lines
   }
+
+  # Prepare horizontal line as ceiling # draws.
+  hline_highest_n <-
+    geom_hline(
+      mapping = NULL,
+      data = NULL,
+      yintercept = max_n,
+      colour = "green",
+      linetype = "dotted"
+    )
 
   # Prepare vertical lines for max values.
   {
@@ -108,7 +118,6 @@ margin_plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
         xintercept = er_highest_n,
         colour = "green"
       )
-
 
     vline_allowed_defect_rate <-
       geom_vline(
@@ -123,6 +132,7 @@ margin_plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
   # Call ggplot() on prepared data, title, subtitle.
   result <-
     ggplot(data = t) +
+    hline_highest_n +
     vline_er_highest_n +
     vline_allowed_defect_rate +
     theme(plot.subtitle = element_text(size = 9, color = "blue")) +
@@ -133,9 +143,20 @@ margin_plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
       #color = possible
       color = possible
     )) +
-    scale_colour_manual(values = c(`TRUE` = "blue", `FALSE` = "transparent"), guide = "none" #,
+    scale_colour_manual(values = c(`TRUE` = "brown", `FALSE` = "transparent"), guide = "none" #,
       # breaks = c(possible) #,
       # labels = c(possible)
+    ) +
+    annotate(
+      "text",
+      x = 0.2,
+      y = max_n,
+      label = "ceiling for # draws",
+      angle = 0,
+      vjust = 0,
+      hjust = 0,
+      size = 3.5,
+      color = "green"
     ) +
     labs(
       title = title,
@@ -144,7 +165,10 @@ margin_plot_varying_allowed_defect_rate <- function(posited_defect_rate = 0.01,
       x = "allowed defect rate",
       y = "draws needed"#,
       # color = "what"
-    )
+    ) +
+    theme(axis.title.x = element_text(colour = "black"),
+          axis.title.y = element_text(colour = "brown")) +
+    theme(plot.title = element_text(size = 14, color = "brown")) #, face = "bold"))
 
   return(result)
 }
