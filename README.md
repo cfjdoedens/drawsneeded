@@ -5,8 +5,9 @@
 
 [![R-CMD-check](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cfjdoedens/drawsneeded/actions/workflows/R-CMD-check.yaml)
 
-[![Codecov test
-coverage](https://codecov.io/gh/cfjdoedens/drawsneeded/graph/badge.svg)](https://app.codecov.io/gh/cfjdoedens/drawsneeded)
+<!-- [![Codecov test -->
+
+<!-- coverage](https://codecov.io/gh/cfjdoedens/drawsneeded/graph/badge.svg)](https://app.codecov.io/gh/cfjdoedens/drawsneeded) -->
 
 <!-- badges: end -->
 
@@ -305,11 +306,12 @@ combined_plots(posited_defect_rate = 0.001, allowed_defect_rate = 0.01,
 
 <img src="man/figures/README-tiny-defects-all-plots-1.png" width="100%" />
 
-The blue graph shows the chance density for values from 0 to 1 of the
-defect rate for the minimum combination of n and k given a *posited*
-defect rate of 0.001, allowed defect rate of 0.01, and certainty of
-0.95. The brown graphs show what happens with the number of draws needed
-when we vary posited defect rate, allowed defect rate and certainty.
+The blue graph, i.e. the upper left, shows the chance density for values
+from 0 to 1 of the defect rate for the minimum combination of n and k
+given a *posited* defect rate of 0.001, allowed defect rate of 0.01, and
+certainty of 0.95. The brown graphs, i.e. the other, show what happens
+with the number of draws needed when we vary posited defect rate,
+allowed defect rate and certainty.
 
 ### No defect expected
 
@@ -415,11 +417,12 @@ combined_plots(posited_defect_rate = 0, allowed_defect_rate = 0.01,
 
 <img src="man/figures/README-zero-defects-all-plots-1.png" width="100%" />
 
-The blue graph shows the chance density for values from 0 to 1 of the
-defect rate for the minimum combination of n and k given a *posited*
-defect rate of 0.0, allowed defect rate of 0.01, and certainty of 0.95.
-The brown graphs show what happens with the number of draws needed when
-we vary posited defect rate, allowed defect rate and certainty.
+The blue graph, i.e. the upper left one, shows the chance density for
+values from 0 to 1 of the defect rate for the minimum combination of n
+and k given a *posited* defect rate of 0.0, allowed defect rate of 0.01,
+and certainty of 0.95. The brown graphs, i.e. the other, show what
+happens with the number of draws needed when we vary posited defect
+rate, allowed defect rate and certainty.
 
 ## Suggested extensions
 
