@@ -326,7 +326,7 @@ drawsneeded_plot <- function(posited_defect_rate,
         subtitle = subtitle,
         # caption = " ",
         x = "postulated defect rate",
-        y = "probability"#,
+        y = "probability density"#,
         # color = "what"
       )
 

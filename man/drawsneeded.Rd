@@ -8,7 +8,8 @@ drawsneeded(posited_defect_rate, allowed_defect_rate, cert = 0.95)
 }
 \arguments{
 \item{posited_defect_rate}{The defect rate of which we want to see how many
-samples it would take to establish that it is below the allowed defect rate.
+samples it would take to establish that it is below the allowed
+defect rate.
 Could for example be our guess of the defect rate.}
 
 \item{allowed_defect_rate}{The highest defect rate that is still acceptable.
@@ -25,9 +26,13 @@ An estimate of the needed number of samples. If the number of
 In sampling we have a file of like items.
 We want to estimate the overall defect rate of  the items.
 This function guesses the number of draws needed
-to establish with some certainty that the defect rate is below a certain threshold.
+to establish with some certainty that the defect rate is below a certain
+threshold.
 }
 \details{
+Note that the prior used by drawsneeded() is flat: each possible defect rate
+is beforehand given an equal probability.
+
 Each of the three arguments can have length > 1, but only one of these
 three arguments.
 }

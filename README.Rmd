@@ -155,6 +155,9 @@ to estimate the minimal number of items that need to be drawn to estimate
 the defect rate with sufficient certainty.
 The posited_defect_rate is used only for planning.
 
+Note that the prior used by drawsneeded() is flat: each possible defect rate is 
+beforehand given an equal probability.
+
 ## Advanced use
 
 ### Planning versus execution

@@ -3,13 +3,18 @@
 #' In sampling we have a file of like items.
 #' We want to estimate the overall defect rate of  the items.
 #' This function guesses the number of draws needed
-#' to establish with some certainty that the defect rate is below a certain threshold.
+#' to establish with some certainty that the defect rate is below a certain
+#' threshold.
 #'
 #' Each of the three arguments can have length > 1, but only one of these
 #' three arguments.
 #'
+#' Note that the prior used by drawsneeded() is flat: each possible defect rate
+#' is beforehand given an equal probability.
+#'
 #' @param posited_defect_rate The defect rate of which we want to see how many
-#'     samples it would take to establish that it is below the allowed defect rate.
+#'     samples it would take to establish that it is below the allowed
+#'     defect rate.
 #'     Could for example be our guess of the defect rate.
 #' @param allowed_defect_rate The highest defect rate that is still acceptable.
 #'     So the threshold.
