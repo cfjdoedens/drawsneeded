@@ -10,7 +10,7 @@ combined_plots(
   cert = 0.95,
   max_n = 1000,
   S = 10000,
-  min_prob = 1.5
+  high_density_area = 0.999
 )
 }
 \arguments{
@@ -26,8 +26,9 @@ Should be higher than posited_defect_rate.}
 \item{S}{The number of points on the X-axis of the
 plot.}
 
-\item{min_prob}{Only points with at least that probability are
-shown in the first plot.}
+\item{high_density_area}{Only points with a probability high enough to
+be part of the high density interval, which has size high_density_area,
+are shown in the plot.}
 }
 \value{
 A ggplot.

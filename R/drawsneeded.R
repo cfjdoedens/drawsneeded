@@ -22,7 +22,7 @@
 #' @param cert The certainty level you want, e.g. \code{0.95}.
 #'
 #' @returns An estimate of the needed number of samples. If the number of
-#'     needed samples comes to close to the maximum integer value, return -1.
+#'     needed samples comes to close to the maximum R integer value, return -1.
 #' @export
 #' @importFrom stats qbeta
 #' @importFrom stats pbeta

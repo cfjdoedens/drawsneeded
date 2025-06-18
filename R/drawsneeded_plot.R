@@ -19,10 +19,10 @@
 #' @param cert The certainty level you want, e.g. \code{0.95}.#'
 #' @param S The number of points on the X-axis of the
 #'     plot. but less points might be shown, as only points
-#'     with a probability density >= min_prob are shown.
-#' @param min_prob Only points with at least that probability are
-#'    shown in the plot.
-#'
+#'     with in the high density interval are shown.
+#' @param high_density_area Only points with a probability high enough to
+#'    be part of the high density interval, which has size high_density_area,
+#'    are shown in the plot.
 #' @returns A ggplot.
 #' @export
 #' @examples
@@ -35,6 +35,7 @@
 #' @importFrom ewgraph ew_from_vec
 #' @importFrom ewgraph ew_get_h
 #' @importFrom ewgraph ew_get_p
+#' @importFrom ewgraph ew_high_density_interval
 #' @importFrom ewgraph ew_maxcumh_p
 #' @importFrom ewgraph ew_maxh
 #' @importFrom ewgraph partition_0_1
@@ -47,7 +48,7 @@ drawsneeded_plot <- function(posited_defect_rate,
                              allowed_defect_rate,
                              cert = 0.95,
                              S = 1e5,
-                             min_prob = 1.5) {
+                             high_density_area = 0.999) {
   # Argument check.
   {
     # No support for drawsneeded() args with length > 1.
@@ -58,9 +59,10 @@ drawsneeded_plot <- function(posited_defect_rate,
     # Check on arguments specific to drawsneeded_plot().
     stopifnot(length(S) == 1)
     stopifnot(posint(S))
-    stopifnot(length(min_prob) == 1)
-    stopifnot(is.numeric(min_prob))
-    stopifnot(min_prob >= 0)
+    stopifnot(length(high_density_area) == 1)
+    stopifnot(is.numeric(high_density_area))
+    stopifnot(0 < high_density_area)
+    stopifnot(high_density_area <= 1)
 
     # We leave the rest of the argument checking to drawsneeded(), called directly below.
   }
@@ -91,8 +93,13 @@ drawsneeded_plot <- function(posited_defect_rate,
     # Place p, h, and colouring in one tibble.
     t <- tibble(colouring, p, h)
 
-    # Keep only higher chance parts.
-    t <- t %>% filter(h >= min_prob)
+    # Get first and last segment of high density interval.
+    lr <- ew_high_density_interval(g, high_density_area)
+    hdi_left <- lr[["left"]]
+    hdi_right <- lr[["right"]]
+
+    # Keep only high density interval.
+    t <- t[hdi_left:hdi_right, ] # Note the comma!
 
     # Count data rows for the plot.
     data_rows_available <- nrow(t)
@@ -106,8 +113,11 @@ drawsneeded_plot <- function(posited_defect_rate,
     }
 
     # Construct title.
-    title <- sprintf("chance graph of postulated defect rate for n = %d, and k = %s",
-                       n, formatf_without_trailing_zeros(n*posited_defect_rate))
+    title <- sprintf(
+      "chance graph of postulated defect rate for n = %d, and k = %s",
+      n,
+      formatf_without_trailing_zeros(n * posited_defect_rate)
+    )
 
     # Construct subtitle.
     {
@@ -122,9 +132,11 @@ drawsneeded_plot <- function(posited_defect_rate,
       )
       lines <- sprintf("%s%s", lines, line)
 
-      line <- sprintf(" S = %d, min_prob = %s\n",
-                      S,
-                      formatf_without_trailing_zeros(min_prob))
+      line <- sprintf(
+        " S = %d, high_density_area = %s\n",
+        S,
+        formatf_without_trailing_zeros(high_density_area)
+      )
       lines <- sprintf("%s%s", lines, line)
 
       line <- "out: "
@@ -144,7 +156,7 @@ drawsneeded_plot <- function(posited_defect_rate,
 
       if (data_rows_available == 0) {
         line <- sprintf(
-          "     NO DATA POINTS SHOWN AS min_prob IS TOO HIGH; PLEASE MAKE min_prob <= %d\n",
+          "     NO DATA POINTS SHOWN AS high_density_interval IS TOO HIGH; PLEASE MAKE high_density_interval <= %d\n",
           floor(most_prob_h)
         )
         lines <- sprintf("%s%s", lines, line)
@@ -232,8 +244,10 @@ drawsneeded_plot <- function(posited_defect_rate,
         y = "probability"#,
         # color = "what"
       ) +
-      theme(axis.title.x = element_text(colour = "black"),
-            axis.title.y = element_text(colour = "blue")) +
+      theme(
+        axis.title.x = element_text(colour = "black"),
+        axis.title.y = element_text(colour = "blue")
+      ) +
       theme(plot.title = element_text(size = 14, color = "blue")) #, face = "bold"))
 
     return(result)
@@ -265,9 +279,11 @@ drawsneeded_plot <- function(posited_defect_rate,
       )
       lines <- sprintf("%s%s", lines, line)
 
-      line <- sprintf("     S = %d, min_prob = %s\n",
-                      S,
-                      formatf_without_trailing_zeros(min_prob))
+      line <- sprintf(
+        "     S = %d, high_density_interval = %s\n",
+        S,
+        formatf_without_trailing_zeros(high_density_area)
+      )
       lines <- sprintf("%s%s", lines, line)
 
       subtitle <- lines

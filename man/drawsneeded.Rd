@@ -20,7 +20,7 @@ Should be higher than posited_defect_rate.}
 }
 \value{
 An estimate of the needed number of samples. If the number of
-    needed samples comes to close to the maximum integer value, return -1.
+    needed samples comes to close to the maximum R integer value, return -1.
 }
 \description{
 In sampling we have a file of like items.
@@ -30,11 +30,11 @@ to establish with some certainty that the defect rate is below a certain
 threshold.
 }
 \details{
-Note that the prior used by drawsneeded() is flat: each possible defect rate
-is beforehand given an equal probability.
-
 Each of the three arguments can have length > 1, but only one of these
 three arguments.
+
+Note that the prior used by drawsneeded() is flat: each possible defect rate
+is beforehand given an equal probability.
 }
 \examples{
   x <- drawsneeded(0.001, 0.02, cert = 0.95)

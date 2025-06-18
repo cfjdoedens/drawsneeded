@@ -18,9 +18,9 @@
 #' @param max_n The number of to be drawn items maximally shown in the plot.
 #' @param S The number of points on the X-axis of the
 #'     plot.
-#' @param min_prob Only points with at least that probability are
-#'    shown in the first plot.
-#'
+#' @param high_density_area Only points with a probability high enough to
+#'    be part of the high density interval, which has size high_density_area,
+#'    are shown in the plot.
 #' @returns A ggplot.
 #' @export
 #' @examples
@@ -36,7 +36,7 @@ combined_plots <- function(posited_defect_rate,
                            cert = 0.95,
                            max_n = 1000,
                            S = 10000,
-                           min_prob = 1.5) {
+                           high_density_area = 0.999) {
   # Argument check.
   {
     # No support for args with length > 1.
@@ -45,7 +45,7 @@ combined_plots <- function(posited_defect_rate,
     stopifnot(length(cert) == 1)
     stopifnot(length(max_n) == 1)
     stopifnot(length(S) == 1)
-    stopifnot(length(min_prob) == 1)
+    stopifnot(length(high_density_area) == 1)
 
   }
 
@@ -55,7 +55,7 @@ combined_plots <- function(posited_defect_rate,
     allowed_defect_rate = allowed_defect_rate,
     cert = cert,
     S = S,
-    min_prob = min_prob
+    high_density_area = high_density_area
   )
   plot2 <- plot_varying_posited_defect_rate(
     allowed_defect_rate = allowed_defect_rate,

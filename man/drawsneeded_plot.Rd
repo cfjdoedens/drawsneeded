@@ -9,7 +9,7 @@ drawsneeded_plot(
   allowed_defect_rate,
   cert = 0.95,
   S = 1e+05,
-  min_prob = 1.5
+  high_density_area = 0.999
 )
 }
 \arguments{
@@ -22,10 +22,11 @@ Should be higher than posited_defect_rate.}
 
 \item{S}{The number of points on the X-axis of the
 plot. but less points might be shown, as only points
-with a probability density >= min_prob are shown.}
+with in the high density interval are shown.}
 
-\item{min_prob}{Only points with at least that probability are
-shown in the plot.}
+\item{high_density_area}{Only points with a probability high enough to
+be part of the high density interval, which has size high_density_area,
+are shown in the plot.}
 }
 \value{
 A ggplot.
