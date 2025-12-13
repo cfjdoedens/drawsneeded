@@ -1,7 +1,7 @@
 Package: drawsneeded
 Type: Package
-Title: Estimates the number of samples needed to ascertain that the defect rate does not exceed a treshold
-Version: 0.1.0
+Title: Estimate the number of samples needed to ascertain that the defect rate does not exceed a treshold
+Version: 0.1.1
 Authors@R: c(
     person(
       "Crist-Jan", "Doedens",

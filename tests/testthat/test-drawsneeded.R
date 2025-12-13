@@ -15,12 +15,20 @@ test_that("expected_defect_rate < 1", {
   expect_error(drawsneeded(1.001, 0.02, 0.95))
 })
 
-test_that("0 < certainty", {
+test_that("0 <= certainty", {
   expect_error(drawsneeded(0.001, 0.02, -0.0001))
 })
 
-test_that("certainty < 1", {
-  expect_error(drawsneeded(0.001, 0.02, 1.000))
+test_that("0 == certainty", {
+  expect_equal(drawsneeded(0.001, 0.02, 0), 0)
+})
+
+test_that("1 == certainty", {
+  expect_equal(drawsneeded(0.001, 0.02, 1), Inf)
+})
+
+test_that("certainty <= 1", {
+  expect_error(drawsneeded(0.001, 0.02, 1.001))
 })
 
 test_that("0 < allowed_defect_rate", {

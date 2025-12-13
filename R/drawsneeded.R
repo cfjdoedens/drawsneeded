@@ -22,7 +22,8 @@
 #' @param cert The certainty level you want, e.g. \code{0.95}.
 #'
 #' @returns An estimate of the needed number of samples. If the number of
-#'     needed samples comes to close to the maximum R integer value, return -1.
+#'     needed samples comes to close to the maximum R integer value, or
+#'     cert ==1, return Inf.
 #' @export
 #' @importFrom stats qbeta
 #' @importFrom stats pbeta
@@ -119,8 +120,16 @@ drawsneeded <- function(posited_defect_rate,
     stopifnot(0 < allowed_defect_rate)
     stopifnot(allowed_defect_rate < 1)
     stopifnot(posited_defect_rate < allowed_defect_rate)
-    stopifnot(0 < cert)
-    stopifnot(cert < 1)
+    stopifnot(0 <= cert)
+    stopifnot(cert <= 1)
+
+    if (cert == 0) {
+      return(0)
+    }
+
+    if (cert == 1) {
+      return(Inf)
+    }
 
     # Binary search for the smallest n such that
     # max_defect_rate(n, posited_defect_rate, cert) <= allowed_defect_rate
@@ -130,7 +139,7 @@ drawsneeded <- function(posited_defect_rate,
       end_range <- max_n
       if (max_defect_rate(end_range, posited_defect_rate, cert) > allowed_defect_rate) {
         # The to be found n can not lie in [begin_range, end_range].
-        return(-1)
+        return(Inf)
       }
 
       # Invariant: the to be found n lies in [begin_range, end_range]
@@ -174,7 +183,6 @@ max_defect_rate <- function(n, posited_defect_rate, cert) {
   # We do this using the beta quantile function.
   # We can interpret cert here as the surface below the chance
   # density function left of the vertical line defect rate == q.
-  # print(c(cert, k + 1, n - k + 1))
   q <- qbeta(cert, shape1 = k + 1, shape2 = n - k + 1)
 
   # pbeta() is the inverse function:
