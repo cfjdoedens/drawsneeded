@@ -19,12 +19,15 @@ drawsneeded is an R package for use in auditing based on statistical
 sampling. It helps choose the sample size. This is based on the required
 level of certainty and the maximum allowed defect rate.
 
-To make this more explicit, drawsneeded is useful when: 1. you want to
-audit the defect rate of a set of like items, and 1. you consider doing
-this audit by means of statistical sampling on the set of items, and 1.
-you want to establish whether or not the defect rate is below a certain
-threshold, and 1. you want to estimate how many items (draws) you need
-to sample, i.e. you want to estimate the needed sample size.
+To make this more explicit, drawsneeded is useful when:
+
+1.  you want to audit the defect rate of a set of like items, and
+2.  you consider doing this audit by means of statistical sampling on
+    the set of items, and
+3.  you want to establish whether or not the defect rate is below a
+    certain threshold, and
+4.  you want to estimate how many items (draws) you need to sample, i.e.
+    you want to estimate the needed sample size.
 
 ## Installation
 

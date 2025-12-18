@@ -57,6 +57,7 @@ knitr::opts_chunk$set(
 drawsneeded is an R package for use in auditing based on statistical sampling. It helps choose the sample size. This is based on the required level of certainty and the maximum allowed defect rate.
 
 To make this more explicit, drawsneeded is useful when:
+
 1. you want to audit the defect rate of a set of like items, and
 1. you consider doing this audit by means of statistical sampling
    on the set of items, and
