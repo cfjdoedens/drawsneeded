@@ -4,7 +4,7 @@
 \alias{drawsneeded}
 \title{compute number of samples needed to establish maximum defect rate with enough certainty}
 \usage{
-drawsneeded(posited_defect_rate, allowed_defect_rate, cert = 0.95)
+drawsneeded(posited_defect_rate = 0, allowed_defect_rate = 0.01, cert = 0.95)
 }
 \arguments{
 \item{posited_defect_rate}{The defect rate of which we want to see how many
@@ -20,7 +20,8 @@ Should be higher than posited_defect_rate.}
 }
 \value{
 An estimate of the needed number of samples. If the number of
-    needed samples comes to close to the maximum R integer value, return -1.
+    needed samples comes to close to the maximum R integer value, or
+    cert ==1, return Inf.
 }
 \description{
 In sampling we have a file of like items.

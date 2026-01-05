@@ -1,0 +1,4 @@
+url: https://cfjdoedens.github.io/drawsneeded/
+template:
+  bootstrap: 5
+  bootswatch: flatly  # Options: flatly, spacelab, darkly, cosmo

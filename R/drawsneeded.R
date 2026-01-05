@@ -30,8 +30,8 @@
 #' @importFrom dplyr near
 #' @examples
 #'   x <- drawsneeded(0.001, 0.02, cert = 0.95)
-drawsneeded <- function(posited_defect_rate,
-                        allowed_defect_rate,
+drawsneeded <- function(posited_defect_rate = 0.0,
+                        allowed_defect_rate = 0.01,
                         cert = 0.95) {
   # We first handle recursion :-) .
   {

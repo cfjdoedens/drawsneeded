@@ -19,7 +19,7 @@ RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-URL: https://github.com/cfjdoedens/drawsneeded
+URL: https://github.com/cfjdoedens/drawsneeded, https://cfjdoedens.github.io/drawsneeded/
 BugReports: https://github.com/cfjdoedens/drawsneeded/issues
 Imports: 
     cowplot,
@@ -31,4 +31,3 @@ Imports:
 Remotes:
     cfjdoedens/binompoiscont,
     cfjdoedens/ewgraph
-    
