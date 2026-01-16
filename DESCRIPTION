@@ -21,12 +21,16 @@ Suggests:
 Config/testthat/edition: 3
 URL: https://github.com/cfjdoedens/drawsneeded, https://cfjdoedens.github.io/drawsneeded/
 BugReports: https://github.com/cfjdoedens/drawsneeded/issues
-Imports: 
-    cowplot,
+Imports:
     binompoiscont,
+    cowplot,
     dplyr,
     ewgraph,
     ggplot2,
+    readr,
+    rhandsontable,
+    shiny,
+    stats,
     tibble
 Remotes:
     cfjdoedens/binompoiscont,

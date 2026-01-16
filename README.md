@@ -174,7 +174,7 @@ In a picture this looks like:
 drawsneeded_plot(posited_defect_rate = 0.001,  allowed_defect_rate = 0.01,                                      cert = 0.95)
 ```
 
-<img src="man/figures/README-tiny-defects-plot-1.png" width="100%" />
+<img src="man/figures/README-tiny-defects-plot-1.png" alt="" width="100%" />
 
 drawsneeded_plot() has called drawsneeded() to compute the number of
 items that should be in the sample. This number is 365. The plot then
@@ -196,7 +196,7 @@ plot_varying_posited_defect_rate(allowed_defect_rate = 0.01,
                                         cert = 0.95, max_n = 1000)
 ```
 
-<img src="man/figures/README-tiny-defects-vary-eer-plot-1.png" width="100%" />
+<img src="man/figures/README-tiny-defects-vary-eer-plot-1.png" alt="" width="100%" />
 
 We see that as posited_defect_rate goes near to allowed_defect_rate, the
 number of draws needed rises. In this graph only the results up to 1000
@@ -208,7 +208,7 @@ plot_varying_posited_defect_rate(allowed_defect_rate = 0.01,
                                         cert = 0.95, max_n = 100000)
 ```
 
-<img src="man/figures/README-tiny-defects-vary-eer-plot-100000-1.png" width="100%" />
+<img src="man/figures/README-tiny-defects-vary-eer-plot-100000-1.png" alt="" width="100%" />
 
 As we can see, when the posited_defect_rate comes more close to the
 allowed_defect_rate, the number of draws needed rises more sharply.
@@ -237,7 +237,7 @@ plot_varying_allowed_defect_rate(posited_defect_rate = 0.001,
                                         cert = 0.95)
 ```
 
-<img src="man/figures/README-tiny-defects-vary-aer-plot-1.png" width="100%" />
+<img src="man/figures/README-tiny-defects-vary-aer-plot-1.png" alt="" width="100%" />
 
 We see that as the allowed_defect_rate moves away from the
 posited_defect_rate, the number of draws falls sharply.
@@ -285,7 +285,7 @@ plot_varying_cert(posited_defect_rate = 0.001,
                          allowed_defect_rate = 0.01)
 ```
 
-<img src="man/figures/README-tiny-defects-vary-cert-plot-1.png" width="100%" />
+<img src="man/figures/README-tiny-defects-vary-cert-plot-1.png" alt="" width="100%" />
 
 As might be expected: if we can do with less certainty, then we need
 fewer draws.
@@ -310,7 +310,7 @@ combined_plots(posited_defect_rate = 0.001, allowed_defect_rate = 0.01,
                cert = 0.95)
 ```
 
-<img src="man/figures/README-tiny-defects-all-plots-1.png" width="100%" />
+<img src="man/figures/README-tiny-defects-all-plots-1.png" alt="" width="100%" />
 
 The blue graph, i.e. the upper left, shows the chance density for values
 from 0 to 1 of the defect rate for the minimum combination of n and k
@@ -341,7 +341,7 @@ drawsneeded_plot(posited_defect_rate = 0, allowed_defect_rate = 0.01,
                  cert = 0.95)
 ```
 
-<img src="man/figures/README-zero-defects-plot-1.png" width="100%" />
+<img src="man/figures/README-zero-defects-plot-1.png" alt="" width="100%" />
 
 Again, we can further analyse the situation by varying over
 posited_defect_rate, or over allowed_defect_rate or over cert. As we
@@ -354,7 +354,7 @@ repeat that here.
 plot_varying_allowed_defect_rate(posited_defect_rate = 0, cert = 0.95)
 ```
 
-<img src="man/figures/README-zero-defects-vary-aer-plot-1.png" width="100%" />
+<img src="man/figures/README-zero-defects-vary-aer-plot-1.png" alt="" width="100%" />
 
 We see that as the allowed_defect_rate moves away from the
 posited_defect_rate, the number of draws falls sharply.
@@ -397,7 +397,7 @@ Finally we can also vary over the certainty we apply.
 plot_varying_cert(posited_defect_rate = 0, allowed_defect_rate = 0.01)
 ```
 
-<img src="man/figures/README-zero-defects-vary-cert-plot-1.png" width="100%" />
+<img src="man/figures/README-zero-defects-vary-cert-plot-1.png" alt="" width="100%" />
 
 As might be expected: more certainty needs more draws.
 
@@ -421,7 +421,7 @@ combined_plots(posited_defect_rate = 0, allowed_defect_rate = 0.01,
                cert = 0.95)
 ```
 
-<img src="man/figures/README-zero-defects-all-plots-1.png" width="100%" />
+<img src="man/figures/README-zero-defects-all-plots-1.png" alt="" width="100%" />
 
 The blue graph, i.e. the upper left one, shows the chance density for
 values from 0 to 1 of the defect rate for the minimum combination of n

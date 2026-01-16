@@ -34,16 +34,28 @@ An estimate of the needed number of samples according
 \description{
 In sampling we have a file of like items.
 We want to estimate the overall defect rate of  the items.
-This function guesses the number of draws needed
+This function esitimates the number of draws needed
 to establish with some certainty that the defect rate is below a certain
 threshold.
 }
 \details{
-Each of the four arguments can have length > 1, but only one of these
-four arguments.
+Each of the four arguments can have length > 1, but only one of these four
+arguments may have a length greater than 1 at a time.
 
 Note that the prior used by drawsneeded() is flat: each possible defect rate
 is beforehand given an equal probability.
+
+This function can compute the number of samples needed based on the
+binomial distribution, or based on the Poisson distribution.
+Note that the Poisson distribution is an approximation of the binomial
+distribution.
+The distribution arguments "binomial" and "Poisson" invoke a computation
+that is as precise as possible given the machine precision
+of the underlying R implementation.
+The distribution argument "Poisson_interpolated" is an approximative
+computation for the Poisson distribution.
+It is included to be able to compare its results with the other two
+distribution arguments.
 }
 \examples{
   x <- drawsneeded(0.001, 0.02, cert = 0.95)
