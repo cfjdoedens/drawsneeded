@@ -4,7 +4,12 @@
 \alias{drawsneeded}
 \title{compute number of samples needed to establish maximum defect rate with enough certainty}
 \usage{
-drawsneeded(posited_defect_rate = 0, allowed_defect_rate = 0.01, cert = 0.95)
+drawsneeded(
+  posited_defect_rate = 0,
+  allowed_defect_rate = 0.01,
+  cert = 0.95,
+  distribution = "binomial"
+)
 }
 \arguments{
 \item{posited_defect_rate}{The defect rate of which we want to see how many
@@ -17,9 +22,12 @@ So the threshold.
 Should be higher than posited_defect_rate.}
 
 \item{cert}{The certainty level you want, e.g. \code{0.95}.}
+
+\item{distribution}{One of "binomial", "Poisson" or "Poisson_interpolated".}
 }
 \value{
-An estimate of the needed number of samples. If the number of
+An estimate of the needed number of samples according
+    to the distribution chosen. If the number of
     needed samples comes to close to the maximum R integer value, or
     cert ==1, return Inf.
 }
@@ -31,8 +39,8 @@ to establish with some certainty that the defect rate is below a certain
 threshold.
 }
 \details{
-Each of the three arguments can have length > 1, but only one of these
-three arguments.
+Each of the four arguments can have length > 1, but only one of these
+four arguments.
 
 Note that the prior used by drawsneeded() is flat: each possible defect rate
 is beforehand given an equal probability.
