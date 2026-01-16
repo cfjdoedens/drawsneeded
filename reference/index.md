@@ -32,3 +32,6 @@
 
 - [`remove_trailing_zeros()`](https://cfjdoedens.github.io/drawsneeded/reference/remove_trailing_zeros.md)
   : remove trailing zeros from string containing at least one "."
+
+- [`run_app()`](https://cfjdoedens.github.io/drawsneeded/reference/run_app.md)
+  : Start de DrawsNeeded Shiny App

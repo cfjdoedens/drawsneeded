@@ -139,7 +139,7 @@
 <p>In a picture this looks like:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/drawsneeded_plot.html">drawsneeded_plot</a></span><span class="op">(</span>posited_defect_rate <span class="op">=</span> <span class="fl">0.001</span>,  allowed_defect_rate <span class="op">=</span> <span class="fl">0.01</span>,                                      cert <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-tiny-defects-plot-1.png" width="100%"></p>
+<p><img src="reference/figures/README-tiny-defects-plot-1.png" alt="" width="100%"></p>
 <p>drawsneeded_plot() has called drawsneeded() to compute the number of items that should be in the sample. This number is 365. The plot then shows the chance graph, i.e. probability density function, of the postulated defect rate given there were n = 365 items drawn, and the sum of defects of these drawn items, k = n * posited_defect_rate = n * 0.01 = 365 * 0.01 = 3.65.</p>
 <p>We can further analyse the situation by varying over posited_defect_rate, or over allowed_defect_rate or over cert. See the following three plots.</p>
 </div>
@@ -150,12 +150,12 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/plot_varying_posited_defect_rate.html">plot_varying_posited_defect_rate</a></span><span class="op">(</span>allowed_defect_rate <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>                                        cert <span class="op">=</span> <span class="fl">0.95</span>, max_n <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-tiny-defects-vary-eer-plot-1.png" width="100%"></p>
+<p><img src="reference/figures/README-tiny-defects-vary-eer-plot-1.png" alt="" width="100%"></p>
 <p>We see that as posited_defect_rate goes near to allowed_defect_rate, the number of draws needed rises. In this graph only the results up to 1000 draws are shown. This limit can be made higher, thereby we zoom out to 100 times larger scale for the y-axis (the number of draws needed).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/plot_varying_posited_defect_rate.html">plot_varying_posited_defect_rate</a></span><span class="op">(</span>allowed_defect_rate <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>                                        cert <span class="op">=</span> <span class="fl">0.95</span>, max_n <span class="op">=</span> <span class="fl">100000</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-tiny-defects-vary-eer-plot-100000-1.png" width="100%"></p>
+<p><img src="reference/figures/README-tiny-defects-vary-eer-plot-100000-1.png" alt="" width="100%"></p>
 <p>As we can see, when the posited_defect_rate comes more close to the allowed_defect_rate, the number of draws needed rises more sharply. Compare this graph with the previous graph: we see that, due to a 100 times bigger scale on the y-axis, the curve looks much flatter, for the part of the posited_defect_rate from 0 to 0.0050.</p>
 <p>We can also study the variation of posited_defect_rate in a non graphical way:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -171,7 +171,7 @@
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/plot_varying_allowed_defect_rate.html">plot_varying_allowed_defect_rate</a></span><span class="op">(</span>posited_defect_rate <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>                                        cert <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-tiny-defects-vary-aer-plot-1.png" width="100%"></p>
+<p><img src="reference/figures/README-tiny-defects-vary-aer-plot-1.png" alt="" width="100%"></p>
 <p>We see that as the allowed_defect_rate moves away from the posited_defect_rate, the number of draws falls sharply.</p>
 <p>Non graphically this looks like (note the 365 computed draws needed for allowed defect rate 0.01):</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -203,7 +203,7 @@
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/plot_varying_cert.html">plot_varying_cert</a></span><span class="op">(</span>posited_defect_rate <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>                         allowed_defect_rate <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-tiny-defects-vary-cert-plot-1.png" width="100%"></p>
+<p><img src="reference/figures/README-tiny-defects-vary-cert-plot-1.png" alt="" width="100%"></p>
 <p>As might be expected: if we can do with less certainty, then we need fewer draws.</p>
 <p>In raw numbers this looks like:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -220,7 +220,7 @@
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/combined_plots.html">combined_plots</a></span><span class="op">(</span>posited_defect_rate <span class="op">=</span> <span class="fl">0.001</span>, allowed_defect_rate <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>               cert <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-tiny-defects-all-plots-1.png" width="100%"></p>
+<p><img src="reference/figures/README-tiny-defects-all-plots-1.png" alt="" width="100%"></p>
 <p>The blue graph, i.e. the upper left, shows the chance density for values from 0 to 1 of the defect rate for the minimum combination of n and k given a <em>posited</em> defect rate of 0.001, allowed defect rate of 0.01, and certainty of 0.95. The brown graphs, i.e. the other, show what happens with the number of draws needed when we vary posited defect rate, allowed defect rate and certainty.</p>
 </div>
 </div>
@@ -240,7 +240,7 @@
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/drawsneeded_plot.html">drawsneeded_plot</a></span><span class="op">(</span>posited_defect_rate <span class="op">=</span> <span class="fl">0</span>, allowed_defect_rate <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>                 cert <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-zero-defects-plot-1.png" width="100%"></p>
+<p><img src="reference/figures/README-zero-defects-plot-1.png" alt="" width="100%"></p>
 <p>Again, we can further analyse the situation by varying over posited_defect_rate, or over allowed_defect_rate or over cert. As we have above already studied varying the posited_defect_rate, we will not repeat that here.</p>
 </div>
 <div class="section level4">
@@ -248,7 +248,7 @@
 </h4>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/plot_varying_allowed_defect_rate.html">plot_varying_allowed_defect_rate</a></span><span class="op">(</span>posited_defect_rate <span class="op">=</span> <span class="fl">0</span>, cert <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-zero-defects-vary-aer-plot-1.png" width="100%"></p>
+<p><img src="reference/figures/README-zero-defects-vary-aer-plot-1.png" alt="" width="100%"></p>
 <p>We see that as the allowed_defect_rate moves away from the posited_defect_rate, the number of draws falls sharply.</p>
 <p>Non graphically this looks like:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -278,7 +278,7 @@
 <p>Finally we can also vary over the certainty we apply.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/plot_varying_cert.html">plot_varying_cert</a></span><span class="op">(</span>posited_defect_rate <span class="op">=</span> <span class="fl">0</span>, allowed_defect_rate <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-zero-defects-vary-cert-plot-1.png" width="100%"></p>
+<p><img src="reference/figures/README-zero-defects-vary-cert-plot-1.png" alt="" width="100%"></p>
 <p>As might be expected: more certainty needs more draws.</p>
 <p>In raw numbers this looks like:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
@@ -295,7 +295,7 @@
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/combined_plots.html">combined_plots</a></span><span class="op">(</span>posited_defect_rate <span class="op">=</span> <span class="fl">0</span>, allowed_defect_rate <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>               cert <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-zero-defects-all-plots-1.png" width="100%"></p>
+<p><img src="reference/figures/README-zero-defects-all-plots-1.png" alt="" width="100%"></p>
 <p>The blue graph, i.e. the upper left one, shows the chance density for values from 0 to 1 of the defect rate for the minimum combination of n and k given a <em>posited</em> defect rate of 0.0, allowed defect rate of 0.01, and certainty of 0.95. The brown graphs, i.e. the other, show what happens with the number of draws needed when we vary posited defect rate, allowed defect rate and certainty.</p>
 </div>
 </div>
