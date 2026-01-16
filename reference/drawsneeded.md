@@ -8,7 +8,12 @@ below a certain threshold.
 ## Usage
 
 ``` r
-drawsneeded(posited_defect_rate = 0, allowed_defect_rate = 0.01, cert = 0.95)
+drawsneeded(
+  posited_defect_rate = 0,
+  allowed_defect_rate = 0.01,
+  cert = 0.95,
+  distribution = "binomial"
+)
 ```
 
 ## Arguments
@@ -28,16 +33,20 @@ drawsneeded(posited_defect_rate = 0, allowed_defect_rate = 0.01, cert = 0.95)
 
   The certainty level you want, e.g. `0.95`.
 
+- distribution:
+
+  One of "binomial", "Poisson" or "Poisson_interpolated".
+
 ## Value
 
-An estimate of the needed number of samples. If the number of needed
-samples comes to close to the maximum R integer value, or cert ==1,
-return Inf.
+An estimate of the needed number of samples according to the
+distribution chosen. If the number of needed samples comes to close to
+the maximum R integer value, or cert ==1, return Inf.
 
 ## Details
 
-Each of the three arguments can have length \> 1, but only one of these
-three arguments.
+Each of the four arguments can have length \> 1, but only one of these
+four arguments.
 
 Note that the prior used by drawsneeded() is flat: each possible defect
 rate is beforehand given an equal probability.
