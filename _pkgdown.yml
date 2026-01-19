@@ -1,4 +1,13 @@
 url: https://cfjdoedens.github.io/drawsneeded/
 template:
   bootstrap: 5
-  bootswatch: flatly  # Options: flatly, spacelab, darkly, cosmo
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, tutorials, news]
+    right: [shiny, search, github]
+  components:
+    shiny:
+      icon: fas fa-rocket
+      text: "Start Calculator"
+      href: https://cfjdoedens.shinyapps.io/drawsneeded/
