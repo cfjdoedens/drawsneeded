@@ -81,6 +81,7 @@ You can install the development version of drawsneeded from
 ## Overview of functions
 
 * drawsneeded() – Estimate number of samples required.
+* run_app() – Starts the interactive Shiny application.
 * drawsneeded_plot() – Visualize relationship between assumptions and sample
   size.
 * plot_varying_*() – Examine sensitivity of required samples to different
@@ -108,6 +109,16 @@ needed drawn items might be smaller or bigger.
 Also, it might turn out, that the set has a higher defect rate than
 allowed_defect_rate. In that case no amount of draws will suffice
 to prove that the defect rate is below allowed_defect_rate.
+
+## Shiny application
+
+The package includes a user-friendly Shiny application that makes it easy to calculate sample sizes and compare scenarios without writing R code. You can start the app with: `drawsneeded::run_app()`.
+
+Features of the App:
+
+* Calculator: An interactive tool to calculate the sample size based on the Binomial, Poisson, or Interpolated Poisson distribution. It includes a sensitivity graph to visualize how the sample size increases as the expected error approaches the tolerable error.
+* Scenario's: A batch processing tool. You can define a scenario (expected error, tolerable error, certainty), and the app automatically generates a comparison table for all three distributions.
+* Export: The calculated scenario table can be downloaded as a CSV file (formatted for Excel).
 
 ## Statistical model
 
@@ -443,5 +454,6 @@ posited defect rate, allowed defect rate and certainty.
 -   Add a table function, that produces a table of draws needed
     based on variations of posited defect rate, allowed defect rate 
     and certainty.
--   Make the functionality of this package into a live shiny app.
-
+-   Add to the shiny app access to more of the functions of the
+    package.
+    

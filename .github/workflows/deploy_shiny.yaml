@@ -1,0 +1,47 @@
+name: Deploy Shiny App
+
+on:
+  push:
+    branches: [main, master] # Of de branch die jij gebruikt
+
+jobs:
+  shiny-deploy:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }} # Nodig om packages van GitHub te installeren
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+
+      - name: Install R Dependencies
+        run: |
+          install.packages(c("shiny", "rsconnect", "remotes", "devtools"))
+          # Installeer de dependencies van jouw package (zoals in DESCRIPTION)
+          remotes::install_deps(dependencies = TRUE)
+          # Installeer jouw package zelf vanaf GitHub zodat versiebeheer klopt
+          # Dit is cruciaal voor shinyapps.io om te snappen waar het vandaan komt
+          remotes::install_github("cfjdoedens/drawsneeded", upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Authorize and Deploy
+        run: |
+          rsconnect::setAccountInfo(name = "${{ secrets.SHINYAPPS_NAME }}",
+                                    token = "${{ secrets.SHINYAPPS_TOKEN }}",
+                                    secret = "${{ secrets.SHINYAPPS_SECRET }}")
+
+          # We deployen de map waar app.R staat
+          rsconnect::deployApp(appDir = "inst/shiny/drawsneeded",
+                               appName = "drawsneeded",
+                               forceUpdate = TRUE)
+        shell: Rscript {0}
