@@ -79,6 +79,7 @@
 </h2>
 <ul>
 <li>drawsneeded() – Estimate number of samples required.</li>
+<li>run_app() – Starts the interactive Shiny application.</li>
 <li>drawsneeded_plot() – Visualize relationship between assumptions and sample size.</li>
 <li>plot_varying_*() – Examine sensitivity of required samples to different parameters.</li>
 <li>combined_plots() - Combine output of all plot functions in one picture.</li>
@@ -89,6 +90,17 @@
 </h2>
 <p>The function drawsneeded(posited_defect_rate, allowed_defect_rate, cert) gives an estimate of the number of drawn items needed to establish with some certainty level, <em>cert</em>, that the defect rate is below a certain threshold, <em>allowed_defect_rate</em>. The assumption of drawsneeded() is that each drawn item exactly has <em>posited_defect_rate</em>. It might be that in practice the items have a defect of either 0 or 1, or, when they have a defect on a scale from 0 to 1, most items have 0 defect and most items will contain no defects at all, and some items will have a large defect, or are even totally defective. So, in practice the defect rate may have greater variance, but this assumption preserves its expected value.</p>
 <p>Due to randomness, the actual number of needed drawn items might be smaller or bigger. Also, it might turn out, that the set has a higher defect rate than allowed_defect_rate. In that case no amount of draws will suffice to prove that the defect rate is below allowed_defect_rate.</p>
+</div>
+<div class="section level2">
+<h2 id="shiny-application">Shiny application<a class="anchor" aria-label="anchor" href="#shiny-application"></a>
+</h2>
+<p>The package includes a user-friendly Shiny application that makes it easy to calculate sample sizes and compare scenarios without writing R code. You can start the app with: <code><a href="reference/run_app.html">drawsneeded::run_app()</a></code>.</p>
+<p>Features of the App:</p>
+<ul>
+<li>Calculator: An interactive tool to calculate the sample size based on the Binomial, Poisson, or Interpolated Poisson distribution. It includes a sensitivity graph to visualize how the sample size increases as the expected error approaches the tolerable error.</li>
+<li>Scenario’s: A batch processing tool. You can define a scenario (expected error, tolerable error, certainty), and the app automatically generates a comparison table for all three distributions.</li>
+<li>Export: The calculated scenario table can be downloaded as a CSV file (formatted for Excel).</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="statistical-model">Statistical model<a class="anchor" aria-label="anchor" href="#statistical-model"></a>
@@ -308,7 +320,7 @@
 <li>Add a cost function that makes additional draws more expensive. The function can help with planning of incremental drawing.</li>
 <li>Add to this README an example table of draws needed based on variations of posited defect rate, allowed defect rate and certainty.</li>
 <li>Add a table function, that produces a table of draws needed based on variations of posited defect rate, allowed defect rate and certainty.</li>
-<li>Make the functionality of this package into a live shiny app.</li>
+<li>Add to the shiny app access to more of the functions of the package.</li>
 </ul>
 </div>
 </div>
