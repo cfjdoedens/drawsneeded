@@ -143,16 +143,34 @@ server <- function(input, output, session) {
     params <- calc_params()
     req(params$allowed, params$cert, !is.na(params$posited))
 
+    # 1. Data Generatie
     max_x <- params$allowed * 0.95
     x_vals <- seq(0, max_x, length.out = 100)
 
+    # HIER ZIT DE FIX:
     y_vals <- sapply(x_vals, function(x) {
-      drawsneeded(x, params$allowed, params$cert, params$dist)
+      # tryCatch vangt de "k not inside 0:1000" error op
+      tryCatch({
+        drawsneeded(x, params$allowed, params$cert, params$dist)
+      }, error = function(e) {
+        return(NA) # Bij een fout (te grote k) geven we 'leeg' terug
+      })
     })
 
     df_plot <- data.frame(Verwacht = x_vals, n = y_vals)
-    curr_point <- df_plot[which.min(abs(df_plot$Verwacht - params$posited)), ]
 
+    # We filteren de mislukte punten eruit
+    df_plot <- df_plot[!is.na(df_plot$n), ]
+
+    # Zoek het punt dat het dichtst bij de huidige invoer ligt
+    # (Alleen als er nog punten over zijn)
+    if(nrow(df_plot) > 0) {
+      curr_point <- df_plot[which.min(abs(df_plot$Verwacht - params$posited)), ]
+    } else {
+      curr_point <- data.frame(Verwacht = numeric(0), n = numeric(0))
+    }
+
+    # 2. Plotten
     ggplot(df_plot, aes(x = Verwacht, y = n)) +
       geom_line(color = "#3498db", linewidth = 1.2) +
       geom_vline(aes(xintercept = params$allowed, linetype = "Toelaatbare Fout"),
@@ -160,15 +178,12 @@ server <- function(input, output, session) {
       geom_point(data = curr_point, aes(x = Verwacht, y = n, color = "Huidige Invoer"),
                  size = 4) +
 
-      # KLEUREN & LIJNEN
       scale_linetype_manual(name = "", values = c("Toelaatbare Fout" = "dashed")) +
       scale_color_manual(name = "", values = c("Huidige Invoer" = "red")) +
 
-      # ASSEN
       scale_x_continuous(labels = label_nl) +
       scale_y_continuous(labels = label_nl) +
 
-      # ZOOM: Hier kappen we de y-as af op 2.500
       coord_cartesian(ylim = c(0, 2500)) +
 
       labs(x = "Verwachte Foutfractie", y = "Steekproefomvang (n)", title = "Gevoeligheidsanalyse") +
